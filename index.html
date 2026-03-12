@@ -85,7 +85,7 @@ const G=[
  {id:4,t:'Kulička',i:'🏓',d:'Odrážej kuličku, bude zrychlovat!',pc:'Šipky L/P',m:'Šipky na displeji'},
  {id:5,t:'Piškvorky',i:'❌',d:'5 v řadě (X a O).',pc:'Myš',m:'Klepnutí na pole'},
  {id:6,t:'Fotbal Pong',i:'⚽',d:'Pro 2 hráče.',pc:'H1: W/S, H2: Nahoru/Dolů',m:'Polož mobil, šipky pro každého'},
- {id:7,t:'Dáma',i:'♟️',d:'Modrá vs Růžová. Obsahuje dvojskoky a pravidlo fouknutí!',pc:'Myš',m:'Klepnutí na displej'}
+ {id:7,t:'Dáma',i:'♟️',d:'Kompletní česká pravidla s dámou!',pc:'Myš',m:'Klepnutí na displej'}
 ];
 
 let cId=0, loop=0, run=0, gObj=null;
@@ -138,9 +138,9 @@ function endG(s,t="Konec Hry", isScore=true){
 }
 function loopF(){if(!run)return; ctx.clearRect(0,0,400,500); gObj.u(); gObj.d(ctx); loop=requestAnimationFrame(loopF);}
 
-// --- 1. TETRIS (Bez neonu) ---
+// --- 1. TETRIS (Klasický čistý design) ---
 const SH=[[],[[1,1,1,1]],[[1,1],[1,1]],[[0,1,0],[1,1,1]],[[1,1,0],[0,1,1]],[[0,1,1],[1,1,0]],[[1,0,0],[1,1,1]],[[0,0,1],[1,1,1]]];
-const CLS=['#000','#00ffff','#ff00ff','#00ff00','#ffff00','#ff0000','#0000ff','#ff8800'];
+const CLS=['#111','#0cf','#00f','#fa0','#ff0','#0c0','#a0f','#f00']; // Klasické retro barvy
 class Tetris{
     constructor(){this.b=Array.from({length:20},()=>Array(10).fill(0)); this.sc=0; this.f=0; this.spawn(); this.kd=0;}
     spawn(){let t=Math.floor(Math.random()*7)+1; this.p={m:SH[t], x:3, y:0, c:t}; if(this.col(0,0)) endG(this.sc);}
@@ -163,16 +163,22 @@ class Tetris{
             }
         } this.f++;
     }
+    // Hezká čistá kostička s rámečkem
+    fB(c,x,y,v){
+        c.fillStyle=CLS[v]; c.fillRect(x,y,20,20);
+        c.strokeStyle='#000'; c.lineWidth=2; c.strokeRect(x+1,y+1,18,18);
+        c.fillStyle='rgba(255,255,255,0.4)'; c.fillRect(x+2,y+2,16,2); c.fillRect(x+2,y+2,2,16);
+    }
     d(c){
-        c.fillStyle='#111'; c.fillRect(50,0,200,400); 
-        c.strokeStyle='#333'; for(let i=0;i<10;i++)for(let j=0;j<20;j++) c.strokeRect(50+i*20,j*20,20,20);
-        for(let r=0;r<20;r++)for(let cl=0;cl<10;cl++)if(this.b[r][cl]){c.fillStyle=CLS[this.b[r][cl]]; c.fillRect(50+cl*20,r*20,19,19); c.strokeRect(50+cl*20,r*20,19,19);}
-        c.fillStyle=CLS[this.p.c]; for(let r=0;r<this.p.m.length;r++)for(let cl=0;cl<this.p.m[r].length;cl++)if(this.p.m[r][cl]){ c.fillRect(50+(this.p.x+cl)*20,(this.p.y+r)*20,19,19); c.strokeRect(50+(this.p.x+cl)*20,(this.p.y+r)*20,19,19);}
+        c.fillStyle='#222'; c.fillRect(50,0,200,400); // Tmavě šedé pozadí
+        c.strokeStyle='#111'; c.lineWidth=1; for(let i=0;i<10;i++)for(let j=0;j<20;j++) c.strokeRect(50+i*20,j*20,20,20);
+        for(let r=0;r<20;r++)for(let cl=0;cl<10;cl++)if(this.b[r][cl]) this.fB(c,50+cl*20,r*20,this.b[r][cl]);
+        for(let r=0;r<this.p.m.length;r++)for(let cl=0;cl<this.p.m[r].length;cl++)if(this.p.m[r][cl]) this.fB(c,50+(this.p.x+cl)*20,(this.p.y+r)*20,this.p.c);
         c.fillStyle='#fff'; c.font='20px Arial'; c.fillText("Skóre: "+this.sc, 260, 30);
     }
 }
 
-// --- 2. FLAPPY (Opravené počítání skóre) ---
+// --- 2. FLAPPY ---
 class Flappy{
     constructor(){this.y=250;this.v=0;this.p=[];this.s=0;this.f=0;this.started=0;}
     u(){
@@ -183,7 +189,7 @@ class Flappy{
         this.p.forEach(p=>{ 
             p.x-=3; 
             if(50>p.x&&20<p.x+50&&(this.y<p.y-70||this.y>p.y+70))endG(this.s); 
-            if(p.x<50 && !p.pass){this.s++; p.pass=1;} // OPRAVA SKÓRE
+            if(p.x<50 && !p.pass){this.s++; p.pass=1;}
         });
         if(this.y>500||this.y<0) endG(this.s); this.p=this.p.filter(p=>p.x>-50); this.f++;
     }
@@ -216,7 +222,7 @@ class Dino{
     }
 }
 
-// --- 4. KULIČKA (Bez glow efektu kuličky) ---
+// --- 4. KULIČKA ---
 class Pong{
     constructor(){this.px=150;this.bx=200;this.by=200;this.vx=3;this.vy=-3;this.s=0;}
     u(){
@@ -230,12 +236,12 @@ class Pong{
     d(c){
         c.fillStyle='#0b0c10'; c.fillRect(0,0,400,500);
         c.fillStyle='#ff00ff'; c.shadowBlur=15; c.shadowColor='#ff00ff'; c.fillRect(this.px,480,100,10); c.shadowBlur=0;
-        c.fillStyle='#fff'; c.beginPath();c.arc(this.bx,this.by,8,0,7);c.fill(); // Kulička už nesvítí
+        c.fillStyle='#fff'; c.beginPath();c.arc(this.bx,this.by,8,0,7);c.fill();
         c.font='30px Arial';c.fillText(this.s,10,40);
     }
 }
 
-// --- 6. FOTBAL PONG (Klasické rozložení) ---
+// --- 6. FOTBAL PONG ---
 class P2{
     constructor(){this.s1=0;this.s2=0;this.r();}
     r(){this.y1=200;this.y2=200;this.bx=200;this.by=250;this.vx=(Math.random()>0.5?3:-3);this.vy=3;this.w=60;}
@@ -255,15 +261,16 @@ class P2{
         c.fillStyle='#0b0c10'; c.fillRect(0,0,400,500);
         c.fillStyle='#66fcf1'; c.shadowBlur=10; c.shadowColor='#66fcf1'; c.fillRect(10,this.y1,10,80); 
         c.fillStyle='#ff00ff'; c.shadowColor='#ff00ff'; c.fillRect(380,this.y2,10,80); c.shadowBlur=0;
-        c.fillStyle='#fff'; c.beginPath();c.arc(this.bx,this.by,8,0,7);c.fill(); // Kulička nesvítí
+        c.fillStyle='#fff'; c.beginPath();c.arc(this.bx,this.by,8,0,7);c.fill(); 
         c.font='30px Arial';c.fillText(this.s1+" - "+this.s2,165,40);
         if(this.w>0){c.fillText("Připravit...", 130, 200);}
     }
 }
 
-// --- 7. DÁMA (Komplexní logika, Fouknutí, Dvojskoky) ---
+// --- 7. DÁMA (Česká pravidla: skok jen vpřed pro pěšce, létat s dámou) ---
 class Checkers{
     constructor(){
+        // 1=Modrý, 2=Růžový, 3=Modrá Dáma, 4=Růžová Dáma
         this.b=Array(8).fill(0).map((_,r)=>Array(8).fill(0).map((_,c)=>(r+c)%2?r<3?2:r>4?1:0:0));
         this.t=1; this.s=null; this.mj=null; this.msg=""; this.mt=0;
         this.upd();
@@ -271,49 +278,84 @@ class Checkers{
         cvs.ontouchstart=e=>{let r=cvs.getBoundingClientRect();this.c(e.touches[0].clientX-r.left,e.touches[0].clientY-r.top);};
     }
     upd(){ document.getElementById('g-stat').innerText="Hraje: "+(this.t===1?"Modrá":"Růžová"); document.getElementById('g-stat').style.color=this.t===1?"var(--c1)":"var(--c2)"; }
-    getJumps(p){
-        let res=[];
-        for(let r=0;r<8;r++)for(let c=0;c<8;c++) if(this.b[r][c]===p && this.getForPiece(r,c).length>0) res.push({r,c});
-        return res;
+    
+    getJ(r,c){ // Vrací možné skoky pro figurku na pozici r,c
+        let p=this.b[r][c], k=p>2, pl=p%2||2, R=[], D=[[-1,-1],[-1,1],[1,-1],[1,1]];
+        D.forEach(v=>{
+            if(!k && v[0]!==(pl===1?-1:1)) return; // Obyčejná figurka jen vpřed
+            let s=1, op=null;
+            while(s<8){
+                let nr=r+v[0]*s, nc=c+v[1]*s;
+                if(nr<0||nr>7||nc<0||nc>7) break;
+                let ce=this.b[nr][nc];
+                if(ce){
+                    if((ce%2||2)===pl || op) break; // Vlastní figurka nebo už druhá překážka = konec směru
+                    op={r:nr,c:nc}; // Našli jsme soupeře k přeskočení
+                } else if(op){ // Pokud už máme soupeře a toto je prázdné políčko -> sem můžeme dopadnout
+                    R.push({r:nr,c:nc,mr:op.r,mc:op.c});
+                    if(!k) break; // Pěšec dopadá vždy hned za soupeře (nemůže létat dál)
+                } else if(!k) break; // Pěšec nemůže jen tak létat naprázdno
+                s++;
+            }
+        }); return R;
     }
-    getForPiece(r,c){
-        let p=this.b[r][c], res=[], d=p===1?-1:1;
-        [[-1,-1],[-1,1],[1,-1],[1,1]].forEach(v=>{ // Standardně můžeme skákat všemi směry
-            let nr=r+v[0]*2, nc=c+v[1]*2, mr=r+v[0], mc=c+v[1];
-            if(nr>=0&&nr<8&&nc>=0&&nc<8 && this.b[nr][nc]===0 && this.b[mr][mc] && this.b[mr][mc]!==p) res.push({r:nr,c:nc,mr,mc});
-        }); return res;
+
+    getM(r,c){ // Vrací možné kroky (bez skoku)
+        let p=this.b[r][c], k=p>2, pl=p%2||2, R=[], D=[[-1,-1],[-1,1],[1,-1],[1,1]];
+        D.forEach(v=>{
+            if(!k && v[0]!==(pl===1?-1:1)) return;
+            let s=1;
+            while(s<8){
+                let nr=r+v[0]*s, nc=c+v[1]*s;
+                if(nr<0||nr>7||nc<0||nc>7 || this.b[nr][nc]) break; // Konec desky nebo překážka
+                R.push({r:nr,c:nc});
+                if(!k) break; // Pěšec jde jen o 1 krok
+                s++;
+            }
+        }); return R;
     }
+
     c(x,y){
         let w=cvs.clientWidth/8, h=cvs.clientHeight/8, c=Math.floor(x/w), r=Math.floor(y/h);
         if(r<0||r>7||c<0||c>7)return;
         
-        if(this.mj && (r!==this.mj.r || c!==this.mj.c) && !this.s) return; // Musí hrát figurkou v dvojskoku
+        if(this.mj && (r!==this.mj.r || c!==this.mj.c) && !this.s) return; // Jsme uprostřed dvojskoku, musíme hrát figurkou
         
         if(this.s){
             let sr=this.s.r, sc=this.s.c, p=this.b[sr][sc];
-            if(this.b[r][c]===0 && (r+c)%2!==0){
-                let dr=r-sr, dc=c-sc, dir=p===1?-1:1;
-                let isMove = Math.abs(dr)===1 && Math.abs(dc)===1 && dr===dir;
-                let jumps = this.getForPiece(sr,sc);
-                let isJump = jumps.find(j=>j.r===r&&j.c===c);
+            if(!p){ this.s=null; return; }
+            
+            if(this.b[r][c]===0 && (r+c)%2!==0){ // Klik na prázdné políčko
+                let jm = this.getJ(sr,sc).find(x=>x.r===r&&x.c===c); // Je to platný skok?
+                let mv = this.getM(sr,sc).find(x=>x.r===r&&x.c===c); // Je to platný tah?
 
-                if(isMove && !this.mj){ // Obyčejný tah
-                    let allJumps = this.getJumps(p);
-                    if(allJumps.length>0){ // FOUKNUTÍ!
-                        let blow = allJumps[0];
-                        this.b[blow.r][blow.c] = 0; // Odstranění figurky
-                        this.msg="FOUKNUTO!"; this.mt=60;
-                    }
-                    this.b[r][c]=p; this.b[sr][sc]=0; this.t=3-this.t; this.upd();
-                } else if(isJump){ // Skok
-                    this.b[r][c]=p; this.b[sr][sc]=0; this.b[isJump.mr][isJump.mc]=0;
-                    if(this.getForPiece(r,c).length>0){ // DVOJSKOK
-                        this.mj={r,c}; this.s={r,c}; return; 
+                if(jm && (!this.mj || (sr===this.mj.r && sc===this.mj.c))){ // SKOK
+                    this.b[jm.mr][jm.mc]=0; // Odstraníme přeskočeného
+                    
+                    if(r===0 && p===1) p=3; // Proměna v Dámu modrá
+                    if(r===7 && p===2) p=4; // Proměna v Dámu růžová
+                    this.b[r][c]=p; this.b[sr][sc]=0; 
+                    
+                    if(this.getJ(r,c).length>0){ // Můžeme skákat dál?
+                        this.mj={r,c}; this.s={r,c}; return;
                     } else { this.mj=null; this.t=3-this.t; this.upd(); }
+                    
+                } else if(mv && !this.mj){ // TAH (a zjišťování fouknutí)
+                    let aJ=[]; // Všechny možné skoky mého týmu
+                    for(let i=0;i<8;i++)for(let j=0;j<8;j++)if(this.b[i][j]&&(this.b[i][j]%2||2)===this.t)aJ.push(...this.getJ(i,j).map(m=>({sr:i,sc:j})));
+                    
+                    if(aJ.length>0){ // FOUKNUTO
+                        let bl=aJ[0]; this.b[bl.sr][bl.sc]=0; this.msg="FOUKNUTO!"; this.mt=60;
+                    }
+                    
+                    if(r===0 && p===1) p=3; // Proměna
+                    if(r===7 && p===2) p=4;
+                    this.b[r][c]=p; this.b[sr][sc]=0;
+                    this.t=3-this.t; this.upd();
                 }
             }
             if(!this.mj) this.s=null;
-        } else if(this.b[r][c]===this.t) this.s={r,c};
+        } else if(this.b[r][c] && (this.b[r][c]%2||2)===this.t) this.s={r,c};
     }
     u(){if(this.mt>0)this.mt--;}
     d(ctx){
@@ -322,8 +364,11 @@ class Checkers{
             ctx.fillStyle=(r+c)%2?'#111':'#eee'; ctx.fillRect(c*w,r*h,w,h);
             let p=this.b[r][c];
             if(p){
-                ctx.fillStyle=p===1?'#66fcf1':'#ff00ff'; ctx.shadowBlur=10; ctx.shadowColor=ctx.fillStyle;
+                ctx.fillStyle=(p%2||2)===1?'#66fcf1':'#ff00ff'; ctx.shadowBlur=10; ctx.shadowColor=ctx.fillStyle;
                 ctx.beginPath(); ctx.arc(c*w+w/2,r*h+h/2,w/2-5,0,7); ctx.fill(); ctx.shadowBlur=0;
+                if(p>2){ // Vykreslení korunky pro Dámu
+                    ctx.fillStyle='gold'; ctx.beginPath(); ctx.arc(c*w+w/2,r*h+h/2,8,0,7); ctx.fill();
+                }
             }
         }
         if(this.s){ctx.strokeStyle='#39ff14';ctx.lineWidth=4;ctx.shadowBlur=15;ctx.shadowColor='#39ff14';ctx.strokeRect(this.s.c*w,this.s.r*h,w,h);ctx.shadowBlur=0;}
@@ -331,7 +376,7 @@ class Checkers{
     }
 }
 
-// --- 5. PIŠKVORKY (DOM) ---
+// --- 5. PIŠKVORKY ---
 let pB=[], pH=[], pT='x';
 function initPisk(){
     const d=document.getElementById('p-grid'); d.innerHTML=''; pB=[]; pH=[]; pT='x'; document.getElementById('g-stat').innerText='Na tahu: X'; document.getElementById('g-stat').style.color="var(--c2)";
