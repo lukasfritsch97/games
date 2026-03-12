@@ -6,8 +6,7 @@
 <style>
 :root{--bg:#0b0c10;--c1:#66fcf1;--c2:#ff00ff;--c3:#39ff14;--txt:#fff;}
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;user-select:none;}
-/* Odebráno overflow: hidden, aby šlo na mobilu přirozeně scrollovat! */
-body{background:linear-gradient(45deg,#0b0c10,#1f2833,#000,#112233);background-size:400% 400%;animation:bgA 15s ease infinite;color:var(--txt);display:flex;flex-direction:column;min-height:100vh;overflow-x:hidden;}
+body{background:linear-gradient(45deg,#0b0c10,#1f2833,#000,#112233);background-size:400% 400%;animation:bgA 15s ease infinite;color:var(--txt);display:flex;flex-direction:column;min-height:100vh;overflow-y:auto;overflow-x:hidden;}
 @keyframes bgA {0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 .screen{display:none;flex:1;padding:15px;flex-direction:column;align-items:center;width:100%;}
 .screen.active{display:flex;}
@@ -20,19 +19,27 @@ h1{margin-bottom:15px;color:var(--c1);text-transform:uppercase;text-shadow:0 0 1
 .card{background:rgba(31,40,51,0.8);backdrop-filter:blur(10px);border-radius:15px;padding:25px;text-align:center;cursor:pointer;border:1px solid rgba(102,252,241,0.3);transition:0.3s;box-shadow:0 8px 32px rgba(0,0,0,0.5);}
 .card:hover{border-color:var(--c1);box-shadow:0 0 20px rgba(102,252,241,0.6);transform:translateY(-5px);}
 .icon{font-size:3.5rem;margin-bottom:10px;text-shadow:0 0 15px rgba(255,255,255,0.4);}
-#game-box{position:relative;width:100%;max-width:500px;height:65vh;background:#000;border:2px solid var(--c1);border-radius:10px;box-shadow:0 0 20px var(--c1);display:flex;justify-content:center;align-items:center;overflow:hidden;}
-canvas{display:block;width:100%;height:100%;object-fit:contain;}
-#p-grid{display:none;grid-template-columns:repeat(15,1fr);width:100%;max-width:500px;aspect-ratio:1;background:var(--c1);gap:2px;padding:2px;box-shadow:0 0 20px var(--c1);}
-.cell{background:#111;display:flex;justify-content:center;align-items:center;font-size:1.8rem;font-weight:bold;cursor:pointer;aspect-ratio:1;overflow:hidden;line-height:1;}
+#game-box{position:relative;width:100%;max-width:500px;aspect-ratio:4/5;background:#000;border:2px solid var(--c1);border-radius:10px;box-shadow:0 0 20px var(--c1);display:flex;justify-content:center;align-items:center;overflow:hidden;}
+canvas{display:block;width:100%;height:100%;}
+#p-grid{display:none;grid-template-columns:repeat(15,1fr);width:100%;height:100%;background:var(--c1);gap:2px;padding:2px;box-shadow:0 0 20px var(--c1);}
+.cell{background:#111;display:flex;justify-content:center;align-items:center;font-size:1.5rem;font-weight:bold;cursor:pointer;overflow:hidden;}
 .cell.x{color:var(--c2);text-shadow:0 0 15px var(--c2);} .cell.o{color:var(--c1);text-shadow:0 0 15px var(--c1);}
 .overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:none;flex-direction:column;justify-content:center;align-items:center;z-index:10;}
 .overlay.active{display:flex;}
 #score{font-size:2.5rem;color:var(--c3);margin:5px 0;text-shadow:0 0 10px var(--c3);}
-.controls{display:none;width:100%;max-width:500px;margin-top:15px;align-items:center;}
-@media(pointer:coarse){.controls.active{display:flex;}}
+
+/* --- MOBILNÍ OVLÁDÁNÍ (Zcela skryté na PC) --- */
+.mob-wrap { display: none !important; }
+.mob-wrap-abs { display: none !important; }
+
+@media(pointer:coarse) {
+    .mob-wrap.active { display: flex !important; width: 100%; max-width: 500px; margin-top: 15px; align-items: center; justify-content: space-between; }
+    .mob-wrap-abs.active { display: block !important; }
+}
+
 .m-btn{background:rgba(102,252,241,0.1);border:2px solid var(--c1);color:var(--c1);border-radius:50%;width:60px;height:60px;font-size:24px;text-shadow:0 0 5px var(--c1);backdrop-filter:blur(5px);}
-.c-left{display:flex;gap:15px;}
-.c-right{display:flex;flex-direction:column;gap:10px;align-items:center;}
+.f-btn{pointer-events:auto; width:50px; height:50px; font-size:20px; background:rgba(255,255,255,0.15); border:1px solid #fff; color:#fff; text-shadow:none;}
+
 .top-bar{width:100%;max-width:500px;display:flex;justify-content:space-between;margin-bottom:10px;}
 #hs-disp{color:gold;font-weight:bold;margin-bottom:15px;font-size:1.2rem;display:none;}
 </style>
@@ -64,9 +71,18 @@ canvas{display:block;width:100%;height:100%;object-fit:contain;}
             <button class="btn btn-sec" style="padding:6px 12px;font-size:0.9rem;" onclick="startG()">Restart</button>
         </div>
     </div>
+    
     <div id="game-box">
         <canvas id="cvs"></canvas>
         <div id="p-grid"></div>
+        
+        <div id="f-ctrls" class="mob-wrap-abs" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:5;">
+            <button class="m-btn f-btn" id="f-tl" style="position:absolute; top:10px; left:10px;">▲</button>
+            <button class="m-btn f-btn" id="f-tr" style="position:absolute; top:10px; right:10px;">▼</button>
+            <button class="m-btn f-btn" id="f-bl" style="position:absolute; bottom:10px; left:10px;">▲</button>
+            <button class="m-btn f-btn" id="f-br" style="position:absolute; bottom:10px; right:10px;">▼</button>
+        </div>
+
         <div id="over" class="overlay">
             <h2 id="e-title" style="color:var(--c2);text-shadow:0 0 10px var(--c2);font-size:2rem;">Konec</h2>
             <div id="score"></div>
@@ -75,9 +91,9 @@ canvas{display:block;width:100%;height:100%;object-fit:contain;}
         </div>
     </div>
     
-    <div id="ctrls" class="controls">
-        <div id="c-left" class="c-left"><button class="m-btn" id="bl">◀</button><button class="m-btn" id="br">▶</button></div>
-        <div id="c-right" class="c-right">
+    <div id="ctrls" class="mob-wrap">
+        <div id="c-left" style="display:flex; gap:15px;"><button class="m-btn" id="bl">◀</button><button class="m-btn" id="br">▶</button></div>
+        <div id="c-right" style="display:flex; flex-direction:column; gap:8px; align-items:center;">
             <button class="m-btn" id="ba" style="border-color:var(--c2);color:var(--c2);">↻</button>
             <button class="m-btn" id="bd">▼</button>
         </div>
@@ -91,7 +107,7 @@ const G=[
  {id:3,t:'Dino Run',i:'🦖',d:'Přeskakuj kaktusy a přežij.',pc:'Mezerník',m:'Tlačítko A'},
  {id:4,t:'Kulička',i:'🏓',d:'Odrážej kuličku, bude zrychlovat!',pc:'Šipky L/P',m:'Šipky na okrajích displeje'},
  {id:5,t:'Piškvorky',i:'❌',d:'5 v řadě (X a O).',pc:'Myš',m:'Klepnutí na pole'},
- {id:6,t:'Fotbal Pong',i:'⚽',d:'Pro 2 hráče.',pc:'H1: W/S, H2: Nahoru/Dolů',m:'Šipky pro každého'},
+ {id:6,t:'Fotbal Pong',i:'⚽',d:'Pro 2 hráče. Nahoře a dole.',pc:'H1: W/S, H2: Šipky Nahoru/Dolů',m:'Šipky v rozích obrazovky'},
  {id:7,t:'Dáma',i:'♟️',d:'Kompletní česká pravidla s dámou!',pc:'Myš',m:'Klepnutí na displej'}
 ];
 
@@ -100,14 +116,21 @@ const cvs=document.getElementById('cvs'), ctx=cvs.getContext('2d');
 cvs.width=400; cvs.height=500;
 let k={}; window.onkeydown=e=>k[e.code]=1; window.onkeyup=e=>k[e.code]=0;
 let mL=0, mR=0, mA=0, mD=0;
+
+// Připojení tlačítek
 const bBtn=(id,v,ke)=>{
     const b=document.getElementById(id); 
+    if(!b) return;
     const on=e=>{e.preventDefault();window[v]=1;k[ke]=1;}; 
     const off=e=>{e.preventDefault();window[v]=0;k[ke]=0;}; 
     b.ontouchstart=on; b.ontouchend=off; b.onmousedown=on; b.onmouseup=off;
 };
+// Standardní tlačítka
 bBtn('bl','mL','ArrowLeft'); bBtn('br','mR','ArrowRight'); 
 bBtn('ba','mA','Space'); bBtn('bd','mD','ArrowDown');
+// Fotbalová tlačítka
+bBtn('f-tl','dummy','ArrowUp'); bBtn('f-tr','dummy','ArrowDown'); 
+bBtn('f-bl','dummy','KeyW'); bBtn('f-br','dummy','KeyS');
 
 function getHS(id){ return parseInt(localStorage.getItem('hs_'+id))||0; }
 function setHS(id,s){ localStorage.setItem('hs_'+id,s); }
@@ -125,36 +148,36 @@ G.forEach(g=>{
 });
 
 function startG(){
-    window.scrollTo(0,0); // Vrátí obrazovku nahoru
+    window.scrollTo(0,0);
     nav('game'); document.getElementById('over').classList.remove('active');
     document.getElementById('new-hs').style.display='none';
     cvs.style.display=cId===5?'none':'block'; document.getElementById('p-grid').style.display=cId===5?'grid':'none';
     document.getElementById('btn-undo').style.display=cId===5?'block':'none';
     
-    // SPRÁVA TLAČÍTEK PRO MOBIL
-    let ctrls = document.getElementById('ctrls');
+    // Zobrazení mobilních ovládacích prvků (Skryté na PC pomocí CSS)
+    let ctrls = document.getElementById('ctrls'), fCtrls = document.getElementById('f-ctrls');
     let cl = document.getElementById('c-left'), cr = document.getElementById('c-right');
     let bl = document.getElementById('bl'), br = document.getElementById('br'), ba = document.getElementById('ba'), bd = document.getElementById('bd');
     
-    // Reset stylů
+    ctrls.classList.remove('active'); fCtrls.classList.remove('active');
     cl.style.display='none'; cr.style.display='none'; bl.style.display='none'; br.style.display='none'; ba.style.display='none'; bd.style.display='none';
-    cl.style.width='auto'; cl.style.justifyContent='flex-start'; ctrls.style.justifyContent='space-between'; ba.innerText='A';
+    cl.style.width='auto'; cl.style.justifyContent='flex-start'; ba.innerText='A'; ba.style.fontSize='24px';
 
-    if(cId===1) { // Tetris: Levá (L/P), Pravá (Rotace/Dolů)
-        ctrls.classList.add('active');
-        cl.style.display='flex'; cr.style.display='flex';
-        bl.style.display='block'; br.style.display='block'; ba.style.display='block'; bd.style.display='block';
-        ba.innerText='↻';
-    } else if(cId===2 || cId===3) { // Dino/Flappy: Jen Áčko uprostřed
-        ctrls.classList.add('active');
-        cr.style.display='flex'; ctrls.style.justifyContent='center';
-        ba.style.display='block';
-    } else if(cId===4 || cId===6) { // Kulička/Fotbal: Šipky na krajích displeje
-        ctrls.classList.add('active');
-        cl.style.display='flex'; cl.style.width='100%'; cl.style.justifyContent='space-between';
-        bl.style.display='block'; br.style.display='block';
-    } else {
-        ctrls.classList.remove('active');
+    if(cId===6) {
+        fCtrls.classList.add('active'); // Fotbal
+    } else if (cId !== 5 && cId !== 7) {
+        ctrls.classList.add('active'); // Ostatní hry (kromě Dama, Piskvorky)
+        
+        if(cId===1) { // Tetris
+            cl.style.display='flex'; cr.style.display='flex';
+            bl.style.display='block'; br.style.display='block'; ba.style.display='block'; bd.style.display='block';
+            ba.innerText='↻'; ba.style.fontSize='30px';
+        } else if(cId===2 || cId===3) { // Dino/Flappy
+            cr.style.display='flex'; ba.style.display='block';
+        } else if(cId===4) { // Kulička
+            cl.style.display='flex'; cl.style.width='100%'; cl.style.justifyContent='space-between';
+            bl.style.display='block'; br.style.display='block';
+        }
     }
 
     document.getElementById('g-stat').innerText='';
@@ -191,7 +214,6 @@ class Tetris{
             if((k.ArrowLeft||mL)&&!this.col(-1,0)) this.p.x--;
             if((k.ArrowRight||mR)&&!this.col(1,0)) this.p.x++;
         }
-        // Rotace vyřešena odděleně od pohybu do stran
         if((k.ArrowUp||mA||k.Space) && !this.kdR){ this.rot(); this.kdR=1; }
         if(!k.ArrowUp&&!mA&&!k.Space) this.kdR=0;
 
@@ -290,8 +312,11 @@ class P2{
     r(){this.y1=200;this.y2=200;this.bx=200;this.by=250;this.vx=(Math.random()>0.5?3:-3);this.vy=3;this.w=60;}
     u(){
         if(this.w>0){this.w--; return;}
-        if(k.KeyW||mL)this.y1-=5; if(k.KeyS)this.y1+=5; 
-        if(k.ArrowUp||k.Space)this.y2-=5; if(k.ArrowDown||mR)this.y2+=5;
+        // P1 hraje W/S nebo šipkami f-bl / f-br
+        if(k.KeyW)this.y1-=5; if(k.KeyS)this.y1+=5; 
+        // P2 hraje Up/Down nebo šipkami f-tl / f-tr
+        if(k.ArrowUp||k.Space)this.y2-=5; if(k.ArrowDown)this.y2+=5;
+        
         this.y1=Math.max(0,Math.min(420,this.y1)); this.y2=Math.max(0,Math.min(420,this.y2));
         this.bx+=this.vx; this.by+=this.vy;
         if(this.by<5||this.by>495)this.vy*=-1;
@@ -373,6 +398,7 @@ class Checkers{
     c(x,y){
         let w=cvs.clientWidth/8, h=cvs.clientHeight/8, c=Math.floor(x/w), r=Math.floor(y/h);
         if(r<0||r>7||c<0||c>7)return;
+        
         if(this.mj && (r!==this.mj.r || c!==this.mj.c) && !this.s) return; 
         
         if(this.s){
@@ -385,6 +411,7 @@ class Checkers{
 
                 if(jm && (!this.mj || (sr===this.mj.r && sc===this.mj.c))){ 
                     this.b[jm.mr][jm.mc]=0; 
+                    
                     if(r===0 && p===1) p=3; 
                     if(r===7 && p===2) p=4; 
                     this.b[r][c]=p; this.b[sr][sc]=0; 
@@ -425,7 +452,7 @@ class Checkers{
     }
 }
 
-// --- 5. PIŠKVORKY (DOM) ---
+// --- 5. PIŠKVORKY ---
 let pB=[], pH=[], pT='x';
 function initPisk(){
     const d=document.getElementById('p-grid'); d.innerHTML=''; pB=[]; pH=[]; pT='x'; document.getElementById('g-stat').innerText='Na tahu: X'; document.getElementById('g-stat').style.color="var(--c2)";
