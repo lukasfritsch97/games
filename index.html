@@ -1,36 +1,41 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
 <title>Profi Herní Portál</title>
 <style>
 :root{--bg:#0b0c10;--c1:#66fcf1;--c2:#ff00ff;--c3:#39ff14;--txt:#fff;}
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;user-select:none;}
-body{background:linear-gradient(45deg,#0b0c10,#1f2833,#000,#112233);background-size:400% 400%;animation:bgA 15s ease infinite;color:var(--txt);display:flex;flex-direction:column;min-height:100vh;overflow:hidden;}
+/* Přidáno 100dvh pro správnou výšku na mobilech (ignoruje lišty prohlížeče) */
+body{background:linear-gradient(45deg,#0b0c10,#1f2833,#000,#112233);background-size:400% 400%;animation:bgA 15s ease infinite;color:var(--txt);display:flex;flex-direction:column;height:100dvh;min-height:100vh;overflow:hidden;}
 @keyframes bgA {0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-.screen{display:none;flex:1;padding:15px;flex-direction:column;align-items:center;width:100%;overflow-y:auto;} /* Oprava scrollovani pro mobil */
+/* Screen teď povoluje posouvání a nezasekává se */
+.screen{display:none;flex:1;padding:15px;flex-direction:column;align-items:center;width:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .screen.active{display:flex;}
-h1{margin-bottom:15px;color:var(--c1);text-transform:uppercase;text-shadow:0 0 15px var(--c1);text-align:center;font-size:2.5rem;letter-spacing:2px;}
+#game.screen { padding: 10px 15px; overflow-y: hidden; } /* Samotná hra nechceme aby scrollovala */
+h1{margin-bottom:15px;color:var(--c1);text-transform:uppercase;text-shadow:0 0 15px var(--c1);text-align:center;font-size:2.5rem;letter-spacing:2px;flex-shrink:0;}
 .btn{background:rgba(17,17,17,0.8);color:var(--c1);border:2px solid var(--c1);padding:10px 20px;font-size:1.1rem;border-radius:8px;cursor:pointer;font-weight:bold;margin:5px;box-shadow:0 0 10px var(--c1);transition:0.3s;backdrop-filter:blur(5px);}
 .btn:hover{background:var(--c1);color:#000;}
 .btn-sec{color:var(--c2);border-color:var(--c2);box-shadow:0 0 10px var(--c2);}
 .btn-sec:hover{background:var(--c2);color:#000;}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px;width:100%;max-width:900px;overflow-y:auto;padding-bottom:20px;z-index:2;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px;width:100%;max-width:900px;padding-bottom:20px;z-index:2;}
 .card{background:rgba(31,40,51,0.8);backdrop-filter:blur(10px);border-radius:15px;padding:25px;text-align:center;cursor:pointer;border:1px solid rgba(102,252,241,0.3);transition:0.3s;box-shadow:0 8px 32px rgba(0,0,0,0.5);}
 .card:hover{border-color:var(--c1);box-shadow:0 0 20px rgba(102,252,241,0.6);transform:translateY(-5px);}
 .icon{font-size:3.5rem;margin-bottom:10px;text-shadow:0 0 15px rgba(255,255,255,0.4);}
-#game-box{position:relative;width:100%;max-width:500px;height:70vh;background:#000;border:2px solid var(--c1);border-radius:10px;box-shadow:0 0 20px var(--c1);display:flex;justify-content:center;align-items:center;overflow:hidden;}
-canvas{display:block;width:100%;height:100%;object-fit:fill;}
-#p-grid{display:none;grid-template-columns:repeat(15,1fr);width:100%;max-width:500px;aspect-ratio:1;background:var(--c1);gap:2px;padding:2px;box-shadow:0 0 20px var(--c1);}
+/* Game box se teď dynamicky zmenší, aby nechal místo tlačítkům */
+#game-box{position:relative;width:100%;max-width:500px;flex:1;min-height:0;background:#000;border:2px solid var(--c1);border-radius:10px;box-shadow:0 0 20px var(--c1);display:flex;justify-content:center;align-items:center;overflow:hidden;margin-bottom:10px;}
+/* Canvas drží poměr stran a zmenší se podle game-boxu */
+canvas{display:block;max-width:100%;max-height:100%;aspect-ratio:4/5;object-fit:fill;}
+#p-grid{display:none;grid-template-columns:repeat(15,1fr);width:100%;max-width:100%;max-height:100%;aspect-ratio:1;background:var(--c1);gap:2px;padding:2px;box-shadow:0 0 20px var(--c1);}
 .cell{background:#111;display:flex;justify-content:center;align-items:center;font-size:1.8rem;font-weight:bold;cursor:pointer;aspect-ratio:1;overflow:hidden;line-height:1;}
 .cell.x{color:var(--c2);text-shadow:0 0 15px var(--c2);} .cell.o{color:var(--c1);text-shadow:0 0 15px var(--c1);}
 .overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:none;flex-direction:column;justify-content:center;align-items:center;z-index:10;}
 .overlay.active{display:flex;}
 #score{font-size:2.5rem;color:var(--c3);margin:5px 0;text-shadow:0 0 10px var(--c3);}
-.controls{display:none;width:100%;max-width:500px;justify-content:space-between;align-items:flex-end;margin-top:15px;}
+.controls{display:none;width:100%;max-width:500px;justify-content:space-between;align-items:flex-end;flex-shrink:0;padding-bottom:10px;}
 @media(pointer:coarse){.controls.active{display:flex;}}
-.m-btn{background:rgba(102,252,241,0.1);border:2px solid var(--c1);color:var(--c1);border-radius:50%;width:60px;height:60px;font-size:24px;text-shadow:0 0 5px var(--c1);backdrop-filter:blur(5px);}
-.top-bar{width:100%;max-width:500px;display:flex;justify-content:space-between;margin-bottom:10px;}
+.m-btn{background:rgba(102,252,241,0.1);border:2px solid var(--c1);color:var(--c1);border-radius:50%;width:60px;height:60px;font-size:24px;text-shadow:0 0 5px var(--c1);backdrop-filter:blur(5px);touch-action:manipulation;}
+.top-bar{width:100%;max-width:500px;display:flex;justify-content:space-between;margin-bottom:10px;flex-shrink:0;}
 #hs-disp{color:gold;font-weight:bold;margin-bottom:15px;font-size:1.2rem;display:none;}
 </style>
 </head>
@@ -98,7 +103,10 @@ let cId=0, loop=0, run=0, gObj=null;
 const cvs=document.getElementById('cvs'), ctx=cvs.getContext('2d');
 cvs.width=400; cvs.height=500;
 let k={}; window.onkeydown=e=>k[e.code]=1; window.onkeyup=e=>k[e.code]=0;
-let mL=0, mR=0, mA=0, mD=0;
+
+// OPRAVA: Použito "var" místo "let", aby správně fungovalo napojení na tlačítka!
+var mL=0, mR=0, mA=0, mD=0; 
+
 const bBtn=(id,v,ke)=>{const b=document.getElementById(id); const on=e=>{e.preventDefault();window[v]=1;k[ke]=1;}; const off=e=>{e.preventDefault();window[v]=0;k[ke]=0;}; b.ontouchstart=on; b.ontouchend=off; b.onmousedown=on; b.onmouseup=off;};
 bBtn('bl','mL','ArrowLeft'); bBtn('br','mR','ArrowRight'); bBtn('ba','mA','Space'); bBtn('bd','mD','ArrowDown');
 
@@ -176,7 +184,7 @@ class Tetris{
             if((k.ArrowRight||mR)&&!this.col(1,0)) this.p.x++;
         }
         
-        let rotP = (k.ArrowUp || mA);
+        let rotP = (k.ArrowUp || mA || k.Space);
         if(rotP && !this.rL) { this.rot(); this.rL = 1; }
         if(!rotP) this.rL = 0;
 
