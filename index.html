@@ -1,40 +1,51 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Profi Herní Portál</title>
 <style>
 :root{--bg:#0b0c10;--c1:#66fcf1;--c2:#ff00ff;--c3:#39ff14;--txt:#fff;}
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;user-select:none;}
-/* Přidáno 100dvh pro správnou výšku na mobilech (ignoruje lišty prohlížeče) */
-body{background:linear-gradient(45deg,#0b0c10,#1f2833,#000,#112233);background-size:400% 400%;animation:bgA 15s ease infinite;color:var(--txt);display:flex;flex-direction:column;height:100dvh;min-height:100vh;overflow:hidden;}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;user-select:none;-webkit-tap-highlight-color:transparent;}
+
+/* 100dvh a skrytý overflow zajistí, že stránka z mobilu nikdy nevyteče dolů */
+body{background:linear-gradient(45deg,#0b0c10,#1f2833,#000,#112233);background-size:400% 400%;animation:bgA 15s ease infinite;color:var(--txt);display:flex;flex-direction:column;height:100dvh;overflow:hidden;}
 @keyframes bgA {0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-/* Screen teď povoluje posouvání a nezasekává se */
+
 .screen{display:none;flex:1;padding:15px;flex-direction:column;align-items:center;width:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .screen.active{display:flex;}
-#game.screen { padding: 10px 15px; overflow-y: hidden; } /* Samotná hra nechceme aby scrollovala */
+
+/* Herní okno se nesmí rolovat a musí využít celou výšku */
+#game.screen { padding: 10px; overflow: hidden; justify-content: space-between; } 
+
 h1{margin-bottom:15px;color:var(--c1);text-transform:uppercase;text-shadow:0 0 15px var(--c1);text-align:center;font-size:2.5rem;letter-spacing:2px;flex-shrink:0;}
 .btn{background:rgba(17,17,17,0.8);color:var(--c1);border:2px solid var(--c1);padding:10px 20px;font-size:1.1rem;border-radius:8px;cursor:pointer;font-weight:bold;margin:5px;box-shadow:0 0 10px var(--c1);transition:0.3s;backdrop-filter:blur(5px);}
 .btn:hover{background:var(--c1);color:#000;}
 .btn-sec{color:var(--c2);border-color:var(--c2);box-shadow:0 0 10px var(--c2);}
 .btn-sec:hover{background:var(--c2);color:#000;}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px;width:100%;max-width:900px;padding-bottom:20px;z-index:2;}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px;width:100%;max-width:900px;padding-bottom:20px;}
 .card{background:rgba(31,40,51,0.8);backdrop-filter:blur(10px);border-radius:15px;padding:25px;text-align:center;cursor:pointer;border:1px solid rgba(102,252,241,0.3);transition:0.3s;box-shadow:0 8px 32px rgba(0,0,0,0.5);}
 .card:hover{border-color:var(--c1);box-shadow:0 0 20px rgba(102,252,241,0.6);transform:translateY(-5px);}
 .icon{font-size:3.5rem;margin-bottom:10px;text-shadow:0 0 15px rgba(255,255,255,0.4);}
-/* Game box se teď dynamicky zmenší, aby nechal místo tlačítkům */
+
+/* Flex: 1 donutí herní plochu ustoupit tlačítkům */
 #game-box{position:relative;width:100%;max-width:500px;flex:1;min-height:0;background:#000;border:2px solid var(--c1);border-radius:10px;box-shadow:0 0 20px var(--c1);display:flex;justify-content:center;align-items:center;overflow:hidden;margin-bottom:10px;}
-/* Canvas drží poměr stran a zmenší se podle game-boxu */
-canvas{display:block;max-width:100%;max-height:100%;aspect-ratio:4/5;object-fit:fill;}
-#p-grid{display:none;grid-template-columns:repeat(15,1fr);width:100%;max-width:100%;max-height:100%;aspect-ratio:1;background:var(--c1);gap:2px;padding:2px;box-shadow:0 0 20px var(--c1);}
-.cell{background:#111;display:flex;justify-content:center;align-items:center;font-size:1.8rem;font-weight:bold;cursor:pointer;aspect-ratio:1;overflow:hidden;line-height:1;}
+/* Zásadní úprava: Canvas si zachová poměr, ale nikdy nepřeteče ven */
+canvas{display:block;max-width:100%;max-height:100%;aspect-ratio:4/5;object-fit:contain;}
+
+#p-grid{display:none;grid-template-columns:repeat(15,1fr);width:100%;height:100%;max-width:500px;max-height:500px;aspect-ratio:1;background:var(--c1);gap:2px;padding:2px;}
+.cell{background:#111;display:flex;justify-content:center;align-items:center;font-size:1.8rem;font-weight:bold;cursor:pointer;overflow:hidden;line-height:1;}
 .cell.x{color:var(--c2);text-shadow:0 0 15px var(--c2);} .cell.o{color:var(--c1);text-shadow:0 0 15px var(--c1);}
+
 .overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:none;flex-direction:column;justify-content:center;align-items:center;z-index:10;}
 .overlay.active{display:flex;}
 #score{font-size:2.5rem;color:var(--c3);margin:5px 0;text-shadow:0 0 10px var(--c3);}
-.controls{display:none;width:100%;max-width:500px;justify-content:space-between;align-items:flex-end;flex-shrink:0;padding-bottom:10px;}
+
+/* Bezpečná zóna pro iPhony zespodu, ať to nepřekrývá čárka domů */
+.controls{display:none;width:100%;max-width:500px;justify-content:space-between;align-items:flex-end;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom);}
 @media(pointer:coarse){.controls.active{display:flex;}}
-.m-btn{background:rgba(102,252,241,0.1);border:2px solid var(--c1);color:var(--c1);border-radius:50%;width:60px;height:60px;font-size:24px;text-shadow:0 0 5px var(--c1);backdrop-filter:blur(5px);touch-action:manipulation;}
+
+.m-btn{background:rgba(102,252,241,0.1);border:2px solid var(--c1);color:var(--c1);border-radius:50%;width:60px;height:60px;font-size:24px;text-shadow:0 0 5px var(--c1);backdrop-filter:blur(5px);touch-action:manipulation;display:flex;justify-content:center;align-items:center;}
 .top-bar{width:100%;max-width:500px;display:flex;justify-content:space-between;margin-bottom:10px;flex-shrink:0;}
 #hs-disp{color:gold;font-weight:bold;margin-bottom:15px;font-size:1.2rem;display:none;}
 </style>
@@ -58,6 +69,11 @@ canvas{display:block;max-width:100%;max-height:100%;aspect-ratio:4/5;object-fit:
 </div>
 
 <div id="game" class="screen">
+    <div id="p2-ctrls" class="controls" style="display:none; width:100%; justify-content:space-between; padding: 10px 0; transform: rotate(180deg); flex-shrink:0;">
+        <button class="m-btn" style="border-color:var(--c2);color:var(--c2);" id="p2l">◀</button>
+        <button class="m-btn" style="border-color:var(--c2);color:var(--c2);" id="p2r">▶</button>
+    </div>
+
     <div class="top-bar" id="t-bar">
         <button class="btn btn-sec" style="padding:6px 12px;font-size:0.9rem;" onclick="nav('home')">Domů</button>
         <span id="g-stat" style="font-weight:bold;line-height:2.2;font-size:1rem;text-shadow:0 0 5px #fff;"></span>
@@ -66,6 +82,7 @@ canvas{display:block;max-width:100%;max-height:100%;aspect-ratio:4/5;object-fit:
             <button class="btn btn-sec" style="padding:6px 12px;font-size:0.9rem;" onclick="startG()">Restart</button>
         </div>
     </div>
+
     <div id="game-box">
         <canvas id="cvs"></canvas>
         <div id="p-grid"></div>
@@ -76,6 +93,7 @@ canvas{display:block;max-width:100%;max-height:100%;aspect-ratio:4/5;object-fit:
             <div style="display:flex;gap:10px;margin-top:10px;"><button class="btn" onclick="startG()">ZNOVU</button><button class="btn btn-sec" onclick="nav('home')">DOMŮ</button></div>
         </div>
     </div>
+    
     <div id="ctrls" class="controls">
         <div id="left-btns" style="display:flex;gap:15px;align-items:flex-end;">
             <button class="m-btn" id="bl">◀</button>
@@ -95,8 +113,8 @@ const G=[
  {id:3,t:'Dino Run',i:'🦖',d:'Přeskakuj kaktusy a přežij.',pc:'Mezerník',m:'Tlačítko A'},
  {id:4,t:'Kulička',i:'🏓',d:'Odrážej kuličku, bude zrychlovat!',pc:'Šipky L/P',m:'Šipky na okrajích displeje'},
  {id:5,t:'Piškvorky',i:'❌',d:'5 v řadě (X a O).',pc:'Myš',m:'Klepnutí na pole'},
- {id:6,t:'Fotbal Pong',i:'⚽',d:'Pro 2 hráče.',pc:'H1: W/S, H2: Nahoru/Dolů',m:'Polož mobil, šipky pro každého'},
- {id:7,t:'Dáma',i:'♟️',d:'Kompletní česká pravidla s dámou!',pc:'Myš',m:'Klepnutí na displej'}
+ {id:6,t:'Fotbal Pong',i:'⚽',d:'Pro 2 hráče. Sedněte si proti sobě!',pc:'H1: A/D, H2: Šipky L/P',m:'Polož mobil, každý má svoje šipky'},
+ {id:7,t:'Dáma',i:'♟️',d:'Kompletní česká pravidla s dámou!',pc:'Myš',m:'Vyber figurku a ťukni kam s ní'}
 ];
 
 let cId=0, loop=0, run=0, gObj=null;
@@ -104,11 +122,18 @@ const cvs=document.getElementById('cvs'), ctx=cvs.getContext('2d');
 cvs.width=400; cvs.height=500;
 let k={}; window.onkeydown=e=>k[e.code]=1; window.onkeyup=e=>k[e.code]=0;
 
-// OPRAVA: Použito "var" místo "let", aby správně fungovalo napojení na tlačítka!
-var mL=0, mR=0, mA=0, mD=0; 
+var mL=0, mR=0, mA=0, mD=0, m2L=0, m2R=0; 
 
-const bBtn=(id,v,ke)=>{const b=document.getElementById(id); const on=e=>{e.preventDefault();window[v]=1;k[ke]=1;}; const off=e=>{e.preventDefault();window[v]=0;k[ke]=0;}; b.ontouchstart=on; b.ontouchend=off; b.onmousedown=on; b.onmouseup=off;};
-bBtn('bl','mL','ArrowLeft'); bBtn('br','mR','ArrowRight'); bBtn('ba','mA','Space'); bBtn('bd','mD','ArrowDown');
+const bBtn=(id,v,ke)=>{
+    const b=document.getElementById(id); 
+    if(!b)return;
+    const on=e=>{e.preventDefault();window[v]=1;k[ke]=1;}; 
+    const off=e=>{e.preventDefault();window[v]=0;k[ke]=0;}; 
+    b.ontouchstart=on; b.ontouchend=off; b.onmousedown=on; b.onmouseup=off;
+};
+bBtn('bl','mL','ArrowLeft'); bBtn('br','mR','ArrowRight'); 
+bBtn('ba','mA','Space'); bBtn('bd','mD','ArrowDown');
+bBtn('p2l','m2L','ArrowLeft'); bBtn('p2r','m2R','ArrowRight');
 
 function getHS(id){ return parseInt(localStorage.getItem('hs_'+id))||0; }
 function setHS(id,s){ localStorage.setItem('hs_'+id,s); }
@@ -128,34 +153,38 @@ G.forEach(g=>{
 function startG(){
     nav('game'); document.getElementById('over').classList.remove('active');
     document.getElementById('new-hs').style.display='none';
+    
+    cvs.onmousedown = null; cvs.ontouchstart = null; // Reset clicku pro čistotu
+    
     cvs.style.display=cId===5?'none':'block'; document.getElementById('p-grid').style.display=cId===5?'grid':'none';
     document.getElementById('btn-undo').style.display=cId===5?'block':'none';
     
-    // Logika zobrazení a layoutu tlačítek podle hry
     let bl=document.getElementById('bl'), br=document.getElementById('br'), ba=document.getElementById('ba'), bd=document.getElementById('bd');
     let lGrp=document.getElementById('left-btns'), rGrp=document.getElementById('right-btns');
+    let p2c=document.getElementById('p2-ctrls'), tBar=document.getElementById('t-bar');
     
-    // Výchozí reset
-    bl.style.display='block'; br.style.display='block'; ba.style.display='block'; bd.style.display='none';
+    // Výchozí reset UI
+    bl.style.display='flex'; br.style.display='flex'; ba.style.display='flex'; bd.style.display='none';
     lGrp.style.width='auto'; lGrp.style.justifyContent='flex-start'; rGrp.style.display='flex';
-    ba.innerText='A';
+    ba.innerText='A'; p2c.style.display='none'; tBar.style.display='flex';
 
-    if(cId===1) { // Tetris
-        bd.style.display='block'; ba.innerText='↻';
-    } else if(cId===2 || cId===3) { // Flappy, Dino
-        bl.style.display='none'; br.style.display='none';
-    } else if(cId===4) { // Pong (Kulička)
-        ba.style.display='none'; rGrp.style.display='none';
-        lGrp.style.width='100%'; lGrp.style.justifyContent='space-between'; // Tlačítka jdou na okraje
+    if(cId===1) { bd.style.display='flex'; ba.innerText='↻'; } 
+    else if(cId===2 || cId===3) { bl.style.display='none'; br.style.display='none'; } 
+    else if(cId===4) { ba.style.display='none'; rGrp.style.display='none'; lGrp.style.width='100%'; lGrp.style.justifyContent='space-between'; }
+    else if(cId===6) { 
+        ba.style.display='none'; rGrp.style.display='none'; 
+        lGrp.style.width='100%'; lGrp.style.justifyContent='space-between'; 
+        p2c.style.display='flex'; tBar.style.display='none'; // Schováme top-bar aby měli hráči čistý stůl
     }
 
-    document.getElementById('ctrls').classList.toggle('active', cId!==5 && cId!==6 && cId!==7);
+    document.getElementById('ctrls').classList.toggle('active', cId!==5 && cId!==7);
     document.getElementById('g-stat').innerText='';
     run=1;
     if(cId===1) gObj=new Tetris(); if(cId===2) gObj=new Flappy(); if(cId===3) gObj=new Dino();
     if(cId===4) gObj=new Pong(); if(cId===5) {initPisk(); return;} if(cId===6) gObj=new P2(); if(cId===7) gObj=new Checkers();
     loopF();
 }
+
 function endG(s,t="Konec Hry", isScore=true){
     run=0; document.getElementById('e-title').innerText=t; 
     let dispScore = s;
@@ -167,7 +196,9 @@ function endG(s,t="Konec Hry", isScore=true){
     }
     document.getElementById('score').innerText=dispScore; 
     document.getElementById('over').classList.add('active');
+    document.getElementById('t-bar').style.display='flex'; // Vrátíme horní panel kdyby byl skrytý fotbalem
 }
+
 function loopF(){if(!run)return; ctx.clearRect(0,0,400,500); gObj.u(); gObj.d(ctx); loop=requestAnimationFrame(loopF);}
 
 // --- 1. TETRIS ---
@@ -183,11 +214,9 @@ class Tetris{
             if((k.ArrowLeft||mL)&&!this.col(-1,0)) this.p.x--;
             if((k.ArrowRight||mR)&&!this.col(1,0)) this.p.x++;
         }
-        
         let rotP = (k.ArrowUp || mA || k.Space);
         if(rotP && !this.rL) { this.rot(); this.rL = 1; }
         if(!rotP) this.rL = 0;
-
         if(this.f%((k.ArrowDown||mD)?4:30)===0){
             if(!this.col(0,1)) this.p.y++; else {
                 for(let r=0;r<this.p.m.length;r++)for(let c=0;c<this.p.m[r].length;c++)if(this.p.m[r][c]) this.b[this.p.y+r][this.p.x+c]=this.p.c;
@@ -277,29 +306,59 @@ class Pong{
     }
 }
 
-// --- 6. FOTBAL PONG ---
+// --- 6. FOTBAL PONG (HRAJÍCÍ SE VERTIKÁLNĚ!) ---
 class P2{
     constructor(){this.s1=0;this.s2=0;this.r();}
-    r(){this.y1=200;this.y2=200;this.bx=200;this.by=250;this.vx=(Math.random()>0.5?3:-3);this.vy=3;this.w=60;}
+    r(){this.x1=160;this.x2=160;this.bx=200;this.by=250;this.vx=(Math.random()>0.5?3:-3);this.vy=(Math.random()>0.5?3:-3);this.w=60;}
     u(){
         if(this.w>0){this.w--; return;}
-        if(k.KeyW||mL)this.y1-=5; if(k.KeyS||mA)this.y1+=5; 
-        if(k.ArrowUp||k.Space)this.y2-=5; if(k.ArrowDown||mR)this.y2+=5;
-        this.y1=Math.max(0,Math.min(420,this.y1)); this.y2=Math.max(0,Math.min(420,this.y2));
+        
+        // P1 hraje dole (A/D nebo m1/mR tlačítka dole)
+        if(k.KeyA||mL)this.x1-=5; if(k.KeyD||mR)this.x1+=5; 
+        
+        // P2 hraje nahoře (Šipky nebo otočená tlačítka nahoře)
+        if(k.ArrowLeft||m2L)this.x2-=5; if(k.ArrowRight||m2R)this.x2+=5;
+        
+        this.x1=Math.max(0,Math.min(320,this.x1)); this.x2=Math.max(0,Math.min(320,this.x2));
+        
         this.bx+=this.vx; this.by+=this.vy;
-        if(this.by<5||this.by>495)this.vy*=-1;
-        if(this.bx<20&&this.by>this.y1&&this.by<this.y1+80){this.vx=Math.abs(this.vx)*1.05;this.bx=20;}
-        if(this.bx>380&&this.by>this.y2&&this.by<this.y2+80){this.vx=-Math.abs(this.vx)*1.05;this.bx=380;}
-        if(this.bx<0){this.s2++;this.r();} if(this.bx>400){this.s1++;this.r();}
+        
+        // Odraz od boků
+        if(this.bx<5||this.bx>395)this.vx*=-1;
+        
+        // Odraz nahoře (P2)
+        if(this.by<20 && this.by>10 && this.bx>this.x2 && this.bx<this.x2+80){
+            this.vy=Math.abs(this.vy)*1.05; this.by=20; this.vx+=(this.bx-(this.x2+40))*0.05;
+        }
+        // Odraz dole (P1)
+        if(this.by>480 && this.by<490 && this.bx>this.x1 && this.bx<this.x1+80){
+            this.vy=-Math.abs(this.vy)*1.05; this.by=480; this.vx+=(this.bx-(this.x1+40))*0.05;
+        }
+        
+        if(this.by<0){this.s1++;this.r();} if(this.by>500){this.s2++;this.r();}
         if(this.s1>4)endG(this.s1+"-"+this.s2,"Modrá Vyhrála", false); if(this.s2>4)endG(this.s1+"-"+this.s2,"Červená Vyhrála", false);
     }
     d(c){
         c.fillStyle='#16213e'; c.fillRect(0,0,400,500);
-        c.fillStyle='#3498db'; c.fillRect(10,this.y1,10,80); 
-        c.fillStyle='#e94560'; c.fillRect(380,this.y2,10,80); 
+        
+        // Hřiště - středová čára
+        c.strokeStyle='rgba(255,255,255,0.2)'; c.lineWidth=2; c.setLineDash([10,10]); 
+        c.beginPath(); c.moveTo(0,250); c.lineTo(400,250); c.stroke(); c.setLineDash([]);
+        c.beginPath(); c.arc(200,250,50,0,Math.PI*2); c.stroke();
+        
+        // Brankáři
+        c.fillStyle='#3498db'; c.fillRect(this.x1,485,80,10); // Modrý dole
+        c.fillStyle='#e94560'; c.fillRect(this.x2,5,80,10);   // Červený nahoře
+        
+        // Míč
         c.fillStyle='#fff'; c.beginPath();c.arc(this.bx,this.by,8,0,7);c.fill(); 
-        c.font='bold 30px Arial';c.fillText(this.s1+" - "+this.s2,165,40);
-        if(this.w>0){c.fillText("Připravit...", 130, 200);}
+        
+        // Skóre červený (otočené pro něj)
+        c.save(); c.translate(200, 200); c.rotate(Math.PI); c.fillStyle='#e94560'; c.font='bold 30px Arial'; c.fillText(this.s2, -10, 0); c.restore();
+        // Skóre modrý
+        c.fillStyle='#3498db'; c.font='bold 30px Arial'; c.fillText(this.s1, 190, 290);
+        
+        if(this.w>0){c.fillStyle='#fff'; c.fillText("Připravit...", 130, 260);}
     }
 }
 
@@ -309,8 +368,28 @@ class Checkers{
         this.b=Array(8).fill(0).map((_,r)=>Array(8).fill(0).map((_,c)=>(r+c)%2?r<3?2:r>4?1:0:0));
         this.t=1; this.s=null; this.mj=null; this.msg=""; this.mt=0;
         this.upd();
-        cvs.onmousedown=e=>this.c(e.offsetX,e.offsetY);
-        cvs.ontouchstart=e=>{let r=cvs.getBoundingClientRect();this.c(e.touches[0].clientX-r.left,e.touches[0].clientY-r.top);};
+        
+        // Pomocná fce pro přesné získání souřadnic i když je canvas zmenšený díky CSS
+        const getXY = (e) => {
+            let rect = cvs.getBoundingClientRect();
+            let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            let clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            // Matematicky převedeme reálné pixely prohlížeče na 400x500 pixely hry
+            return {
+                x: (clientX - rect.left) * (400 / rect.width),
+                y: (clientY - rect.top) * (500 / rect.height)
+            };
+        };
+        
+        const clickHandler = (e) => {
+            if(cId!==7) return; 
+            e.preventDefault(); 
+            let pos = getXY(e);
+            this.c(pos.x, pos.y);
+        };
+        
+        cvs.onmousedown = clickHandler;
+        cvs.ontouchstart = clickHandler;
     }
     upd(){ document.getElementById('g-stat').innerText="Hraje: "+(this.t===1?"Modrá":"Červená"); document.getElementById('g-stat').style.color=this.t===1?"#3498db":"#e94560"; }
     
@@ -364,7 +443,7 @@ class Checkers{
     }
 
     c(x,y){
-        let w=cvs.clientWidth/8, h=cvs.clientHeight/8, c=Math.floor(x/w), r=Math.floor(y/h);
+        let w=400/8, h=500/8, c=Math.floor(x/w), r=Math.floor(y/h);
         if(r<0||r>7||c<0||c>7)return;
         
         if(this.mj && (r!==this.mj.r || c!==this.mj.c) && !this.s) return; 
