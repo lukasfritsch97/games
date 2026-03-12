@@ -1,1 +1,283 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Herní Portál - 7 Her</title>
+<style>
+:root{--bg:#1a1a2e;--pri:#e94560;--sec:#0f3460;--txt:#fff;}
+*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif;user-select:none;}
+body{background:var(--bg);color:var(--txt);display:flex;flex-direction:column;min-height:100vh;overflow:hidden;}
+.screen{display:none;flex:1;padding:15px;flex-direction:column;align-items:center;width:100%;}
+.screen.active{display:flex;}
+h1{margin-bottom:15px;color:var(--pri);text-transform:uppercase;}
+.btn{background:var(--pri);color:#fff;border:none;padding:10px 20px;font-size:1.1rem;border-radius:5px;cursor:pointer;font-weight:bold;margin:5px;}
+.btn-sec{background:var(--sec);}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;width:100%;max-width:900px;overflow-y:auto;}
+.card{background:#16213e;border-radius:10px;padding:15px;text-align:center;cursor:pointer;border:2px solid transparent;}
+.card:hover{border-color:var(--pri);}
+.icon{font-size:2.5rem;}
+#game-box{position:relative;width:100%;max-width:500px;aspect-ratio:4/5;background:#000;border-radius:8px;box-shadow:0 0 15px #000;display:flex;justify-content:center;align-items:center;overflow:hidden;}
+canvas{display:block;width:100%;height:100%;object-fit:contain;background:#222;}
+#p-grid{display:none;grid-template-columns:repeat(15,1fr);width:100%;height:100%;background:#333;gap:1px;}
+.cell{background:#eee;display:flex;justify-content:center;align-items:center;font-size:1.2rem;font-weight:bold;cursor:pointer;}
+.cell.x{color:#e94560;} .cell.o{color:#0f3460;}
+.overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:none;flex-direction:column;justify-content:center;align-items:center;z-index:10;}
+.overlay.active{display:flex;}
+#score{font-size:2rem;color:var(--pri);margin:15px 0;}
+.controls{display:none;width:100%;max-width:500px;justify-content:space-between;margin-top:10px;}
+@media(pointer:coarse){.controls.active{display:flex;}}
+.m-btn{background:rgba(255,255,255,0.2);border:2px solid #fff;color:#fff;border-radius:50%;width:60px;height:60px;font-size:20px;}
+.top-bar{width:100%;max-width:500px;display:flex;justify-content:space-between;margin-bottom:10px;}
+</style>
+</head>
+<body>
 
+<div id="home" class="screen active">
+    <h1>Herní Portál</h1>
+    <div class="grid" id="menu"></div>
+</div>
+
+<div id="intro" class="screen">
+    <h1 id="i-title"></h1><p id="i-desc" style="max-width:500px;text-align:center;margin-bottom:15px;"></p>
+    <div style="background:#16213e;padding:15px;border-radius:8px;margin-bottom:15px;width:100%;max-width:500px;">
+        <p>💻 <b>PC:</b> <span id="i-pc"></span></p><p>📱 <b>Mobil:</b> <span id="i-mob"></span></p>
+    </div>
+    <div><button class="btn" onclick="startG()">HRÁT</button><button class="btn btn-sec" onclick="nav('home')">ZPĚT</button></div>
+</div>
+
+<div id="game" class="screen">
+    <div class="top-bar">
+        <button class="btn btn-sec" style="padding:5px 10px;font-size:0.9rem;" onclick="nav('home')">Zpět</button>
+        <span id="g-stat" style="font-weight:bold;line-height:2;"></span>
+        <button class="btn btn-sec" id="btn-undo" style="display:none;padding:5px 10px;" onclick="undoP()">Zpět tah</button>
+    </div>
+    <div id="game-box">
+        <canvas id="cvs"></canvas>
+        <div id="p-grid"></div>
+        <div id="over" class="overlay">
+            <h2 id="e-title">Konec</h2><div id="score"></div>
+            <div><button class="btn" onclick="startG()">ZNOVU</button><button class="btn btn-sec" onclick="nav('home')">DOMŮ</button></div>
+        </div>
+    </div>
+    <div id="ctrls" class="controls">
+        <div style="display:flex;gap:10px;"><button class="m-btn" id="bl">◀</button><button class="m-btn" id="br">▶</button></div>
+        <button class="m-btn" id="ba" style="border-color:var(--pri);">A</button>
+    </div>
+</div>
+
+<script>
+const G=[
+ {id:1,t:'Tetris',i:'🧱',d:'Skládej bloky, padají dolů.',pc:'Šipky: L/P pohyb, Nahoru rotace, Dolů pád',m:'L/P pohyb, A rotace'},
+ {id:2,t:'Flappy Bird',i:'🦅',d:'Leť mezi sloupy.',pc:'Mezerník',m:'Tlačítko A'},
+ {id:3,t:'Dino Run',i:'🦖',d:'Přeskakuj kaktusy.',pc:'Mezerník',m:'Tlačítko A'},
+ {id:4,t:'Kulička',i:'🏓',d:'Odrážej kuličku, bude zrychlovat!',pc:'Šipky L/P',m:'Šipky na displeji'},
+ {id:5,t:'Piškvorky',i:'❌',d:'5 v řadě (X a O).',pc:'Myš',m:'Klepnutí na pole'},
+ {id:6,t:'Fotbal Pong',i:'⚽',d:'Pro 2 hráče. Nepusť míč do brány.',pc:'H1: W/S, H2: Nahoru/Dolů',m:'Polož mobil, šipky pro každého'},
+ {id:7,t:'Dáma',i:'♟️',d:'Klasická desková Dáma (žluté kroužky = tahy).',pc:'Myš',m:'Klepnutí'}
+];
+
+let cId=0, loop=0, run=0, gObj=null;
+const cvs=document.getElementById('cvs'), ctx=cvs.getContext('2d');
+cvs.width=400; cvs.height=500;
+let k={}; window.onkeydown=e=>k[e.code]=1; window.onkeyup=e=>k[e.code]=0;
+let mL=0, mR=0, mA=0;
+const bBtn=(id,v,ke)=>{const b=document.getElementById(id); const on=e=>{e.preventDefault();window[v]=1;k[ke]=1;}; const off=e=>{e.preventDefault();window[v]=0;k[ke]=0;}; b.ontouchstart=on; b.ontouchend=off; b.onmousedown=on; b.onmouseup=off;};
+bBtn('bl','mL','ArrowLeft'); bBtn('br','mR','ArrowRight'); bBtn('ba','mA','Space');
+
+function nav(s){document.querySelectorAll('.screen').forEach(e=>e.classList.remove('active'));document.getElementById(s).classList.add('active');cancelAnimationFrame(loop);run=0;}
+G.forEach(g=>{
+    let d=document.createElement('div'); d.className='card'; d.innerHTML=`<div class="icon">${g.i}</div><h2>${g.t}</h2>`;
+    d.onclick=()=>{cId=g.id; document.getElementById('i-title').innerText=g.t; document.getElementById('i-desc').innerText=g.d; document.getElementById('i-pc').innerText=g.pc; document.getElementById('i-mob').innerText=g.m; nav('intro');};
+    document.getElementById('menu').appendChild(d);
+});
+
+function startG(){
+    nav('game'); document.getElementById('over').classList.remove('active');
+    cvs.style.display=cId===5?'none':'block'; document.getElementById('p-grid').style.display=cId===5?'grid':'none';
+    document.getElementById('btn-undo').style.display=cId===5?'block':'none';
+    document.getElementById('ctrls').classList.toggle('active', cId!==5&&cId!==7);
+    document.getElementById('ba').style.display=(cId===4||cId===6)?'none':'block';
+    document.getElementById('g-stat').innerText='';
+    run=1;
+    if(cId===1) gObj=new Tetris(); if(cId===2) gObj=new Flappy(); if(cId===3) gObj=new Dino();
+    if(cId===4) gObj=new Pong(); if(cId===5) {initPisk(); return;} if(cId===6) gObj=new P2(); if(cId===7) gObj=new Checkers();
+    loopF();
+}
+function endG(s,t="Konec Hry"){run=0; document.getElementById('e-title').innerText=t; document.getElementById('score').innerText=s; document.getElementById('over').classList.add('active');}
+function loopF(){if(!run)return; ctx.clearRect(0,0,400,500); gObj.u(); gObj.d(ctx); loop=requestAnimationFrame(loopF);}
+
+// --- 1. TETRIS ---
+const SH=[[],[[1,1,1,1]],[[1,1],[1,1]],[[0,1,0],[1,1,1]],[[1,1,0],[0,1,1]],[[0,1,1],[1,1,0]],[[1,0,0],[1,1,1]],[[0,0,1],[1,1,1]]];
+const CLS=['#000','#0ff','#ff0','#a0f','#0f0','#f00','#00f','#f80'];
+class Tetris{
+    constructor(){this.b=Array.from({length:20},()=>Array(10).fill(0)); this.sc=0; this.f=0; this.spawn(); this.kd=0;}
+    spawn(){let t=Math.floor(Math.random()*7)+1; this.p={m:SH[t], x:3, y:0, c:t}; if(this.col(0,0)) endG("Skóre: "+this.sc);}
+    col(dx,dy,m=this.p.m){for(let r=0;r<m.length;r++)for(let c=0;c<m[r].length;c++)if(m[r][c]){let nx=this.p.x+c+dx, ny=this.p.y+r+dy; if(nx<0||nx>=10||ny>=20||(ny>=0&&this.b[ny][nx])) return 1;} return 0;}
+    rot(){let nm=this.p.m[0].map((_,i)=>this.p.m.map(r=>r[i]).reverse()); if(!this.col(0,0,nm)) this.p.m=nm;}
+    u(){
+        if(this.f%5===0){
+            if((k.ArrowLeft||mL)&&!this.kd&&!this.col(-1,0)) this.p.x--;
+            if((k.ArrowRight||mR)&&!this.kd&&!this.col(1,0)) this.p.x++;
+            if((k.ArrowUp||mA)&&!this.kd) this.rot();
+            this.kd=(k.ArrowLeft||k.ArrowRight||k.ArrowUp||mL||mR||mA);
+        }
+        if(!k.ArrowLeft&&!k.ArrowRight&&!k.ArrowUp&&!mL&&!mR&&!mA) this.kd=0;
+        if(this.f%(k.ArrowDown?5:30)===0){
+            if(!this.col(0,1)) this.p.y++; else {
+                for(let r=0;r<this.p.m.length;r++)for(let c=0;c<this.p.m[r].length;c++)if(this.p.m[r][c]) this.b[this.p.y+r][this.p.x+c]=this.p.c;
+                let cL=0; this.b=this.b.filter(r=>{let f=r.every(v=>v); if(f)cL++; return !f;});
+                while(this.b.length<20) this.b.unshift(Array(10).fill(0));
+                this.sc+=cL*10; this.spawn();
+            }
+        } this.f++;
+    }
+    d(c){
+        c.fillStyle='#111'; c.fillRect(50,0,200,400); // plocha
+        c.strokeStyle='#333'; for(let i=0;i<10;i++)for(let j=0;j<20;j++) c.strokeRect(50+i*20,j*20,20,20);
+        for(let r=0;r<20;r++)for(let cl=0;cl<10;cl++)if(this.b[r][cl]){c.fillStyle=CLS[this.b[r][cl]]; c.fillRect(50+cl*20,r*20,19,19);}
+        c.fillStyle=CLS[this.p.c]; for(let r=0;r<this.p.m.length;r++)for(let cl=0;cl<this.p.m[r].length;cl++)if(this.p.m[r][cl]) c.fillRect(50+(this.p.x+cl)*20,(this.p.y+r)*20,19,19);
+        c.fillStyle='#fff'; c.font='20px Arial'; c.fillText("Skóre: "+this.sc, 260, 30);
+    }
+}
+
+// --- 2. FLAPPY ---
+class Flappy{
+    constructor(){this.y=250;this.v=0;this.p=[];this.s=0;this.f=0;this.j=0;}
+    u(){
+        this.v+=0.5; this.y+=this.v;
+        if((k.Space||mA)&&!this.j){this.v=-7;this.j=1;} if(!k.Space&&!mA)this.j=0;
+        if(this.f%90===0) this.p.push({x:400,y:Math.random()*200+100});
+        this.p.forEach(p=>{ p.x-=3; if(50>p.x&&20<p.x+50&&(this.y<p.y-70||this.y>p.y+70))endG("Skóre: "+this.s); if(p.x===20)this.s++; });
+        if(this.y>500||this.y<0) endG("Skóre: "+this.s); this.p=this.p.filter(p=>p.x>-50); this.f++;
+    }
+    d(c){c.fillStyle='#87CEEB';c.fillRect(0,0,400,500); c.fillStyle='#2ECC71'; this.p.forEach(p=>{c.fillRect(p.x,0,50,p.y-70);c.fillRect(p.x,p.y+70,50,500);}); c.font='30px Arial';c.fillText('🦅',20,this.y); c.fillStyle='#fff';c.fillText(this.s,10,40);}
+}
+
+// --- 3. DINO ---
+class Dino{
+    constructor(){this.y=350;this.v=0;this.o=[];this.s=0;this.f=0;this.sp=5;}
+    u(){
+        this.v+=0.6; this.y+=this.v; if(this.y>350){this.y=350;this.v=0;}
+        if((k.Space||mA)&&this.y===350)this.v=-12;
+        if(this.f%(Math.floor(Math.random()*50)+50)===0) this.o.push({x:400,w:20+Math.random()*20,h:30+Math.random()*30});
+        this.o.forEach(o=>{ o.x-=this.sp; if(50<o.x+o.w&&80>o.x&&this.y+30>380-o.h)endG("Skóre: "+Math.floor(this.s)); });
+        this.o=this.o.filter(o=>o.x>-50); this.s+=0.1; this.sp+=0.002; this.f++;
+    }
+    d(c){c.fillStyle='#f4a261';c.fillRect(0,380,400,120); c.font='35px Arial';c.fillText('🦖',40,this.y+30); c.fillStyle='#2a9d8f'; this.o.forEach(o=>c.fillRect(o.x,380-o.h,o.w,o.h)); c.fillStyle='#fff';c.fillText(Math.floor(this.s),10,40);}
+}
+
+// --- 4. KULIČKA ---
+class Pong{
+    constructor(){this.px=150;this.bx=200;this.by=200;this.vx=3;this.vy=-3;this.s=0;}
+    u(){
+        if(k.ArrowLeft||mL)this.px-=6; if(k.ArrowRight||mR)this.px+=6;
+        if(this.px<0)this.px=0; if(this.px>300)this.px=300;
+        this.bx+=this.vx; this.by+=this.vy;
+        if(this.bx<5||this.bx>395)this.vx*=-1; if(this.by<5)this.vy*=-1;
+        if(this.by>470&&this.by<480&&this.bx>this.px&&this.bx<this.px+100){this.vy=-Math.abs(this.vy)*1.05; this.vx*=1.05; this.by=470; this.s++;}
+        if(this.by>500)endG("Skóre: "+this.s);
+    }
+    d(c){c.fillStyle='#fff'; c.fillRect(this.px,480,100,10); c.beginPath();c.arc(this.bx,this.by,8,0,7);c.fill(); c.font='30px Arial';c.fillText(this.s,10,40);}
+}
+
+// --- 6. FOTBAL PONG ---
+class P2{
+    constructor(){this.y1=200;this.y2=200;this.bx=200;this.by=250;this.vx=4;this.vy=4;this.s1=0;this.s2=0;}
+    u(){
+        if(k.KeyW||mL)this.y1-=5; if(k.KeyS||mA)this.y1+=5; // mA na S
+        if(k.ArrowUp||k.Space)this.y2-=5; if(k.ArrowDown||mR)this.y2+=5;
+        this.y1=Math.max(0,Math.min(420,this.y1)); this.y2=Math.max(0,Math.min(420,this.y2));
+        this.bx+=this.vx; this.by+=this.vy;
+        if(this.by<5||this.by>495)this.vy*=-1;
+        if(this.bx<20&&this.by>this.y1&&this.by<this.y1+80){this.vx=Math.abs(this.vx)*1.05;this.bx=20;}
+        if(this.bx>380&&this.by>this.y2&&this.by<this.y2+80){this.vx=-Math.abs(this.vx)*1.05;this.bx=380;}
+        if(this.bx<0){this.s2++;this.r();} if(this.bx>400){this.s1++;this.r();}
+        if(this.s1>4)endG(this.s1+"-"+this.s2,"Modrá Vyhrála"); if(this.s2>4)endG(this.s1+"-"+this.s2,"Červená Vyhrála");
+    }
+    r(){this.bx=200;this.by=250;this.vx=Math.random()>0.5?4:-4;this.vy=4;}
+    d(c){c.fillStyle='#3498db';c.fillRect(10,this.y1,10,80); c.fillStyle='#e74c3c';c.fillRect(380,this.y2,10,80); c.fillStyle='#fff';c.beginPath();c.arc(this.bx,this.by,8,0,7);c.fill(); c.font='30px Arial';c.fillText(this.s1+" - "+this.s2,165,40);}
+}
+
+// --- 7. DÁMA ---
+class Checkers{
+    constructor(){
+        this.b=[]; this.t=1; this.sP=null; this.vM=[];
+        for(let r=0;r<8;r++){this.b[r]=[];for(let c=0;c<8;c++){
+            if((r+c)%2!==0){if(r<3)this.b[r][c]={p:2,k:0}; else if(r>4)this.b[r][c]={p:1,k:0}; else this.b[r][c]=null;} else this.b[r][c]=null;
+        }}
+        cvs.onmousedown=e=>this.clk(e.offsetX,e.offsetY);
+        cvs.ontouchstart=e=>{let r=cvs.getBoundingClientRect(); this.clk(e.touches[0].clientX-r.left, e.touches[0].clientY-r.top);};
+    }
+    clk(x,y){
+        let c=Math.floor(x/(400/8)), r=Math.floor(y/(500/8));
+        if(r>7||r<0||c>7||c<0)return;
+        let mv=this.vM.find(m=>m.r===r&&m.c===c);
+        if(mv){ // Tah
+            this.b[r][c]=this.b[this.sP.r][this.sP.c]; this.b[this.sP.r][this.sP.c]=null;
+            if(mv.cp) this.b[mv.cp.r][mv.cp.c]=null; // Skok
+            if(r===0&&this.b[r][c].p===1) this.b[r][c].k=1; // Dáma bílá
+            if(r===7&&this.b[r][c].p===2) this.b[r][c].k=1; // Dáma černá
+            this.t=this.t===1?2:1; this.sP=null; this.vM=[];
+            document.getElementById('g-stat').innerText=this.t===1?"Bílý":"Černý";
+        } else if(this.b[r][c]&&this.b[r][c].p===this.t){
+            this.sP={r,c}; this.vM=[];
+            let d=[]; let pc=this.b[r][c];
+            if(pc.p===1||pc.k) d.push([-1,-1],[-1,1]);
+            if(pc.p===2||pc.k) d.push([1,-1],[1,1]);
+            d.forEach(v=>{
+                let nr=r+v[0], nc=c+v[1];
+                if(nr>=0&&nr<8&&nc>=0&&nc<8){
+                    if(!this.b[nr][nc]) this.vM.push({r:nr,c:nc});
+                    else if(this.b[nr][nc].p!==pc.p){
+                        let jr=nr+v[0], jc=nc+v[1];
+                        if(jr>=0&&jr<8&&jc>=0&&jc<8&&!this.b[jr][jc]) this.vM.push({r:jr,c:jc,cp:{r:nr,c:nc}});
+                    }
+                }
+            });
+        } else {this.sP=null;this.vM=[];}
+    }
+    u(){}
+    d(c){
+        let w=400/8, h=500/8;
+        for(let r=0;r<8;r++)for(let cl=0;cl<8;cl++){
+            c.fillStyle=(r+cl)%2===0?'#eee':'#555'; c.fillRect(cl*w,r*h,w,h);
+            let pc=this.b[r][cl];
+            if(pc){
+                c.fillStyle=pc.p===1?'#fff':'#222'; c.beginPath(); c.arc(cl*w+w/2,r*h+h/2,w/2-5,0,7); c.fill();
+                c.strokeStyle=pc.p===1?'#ccc':'#000'; c.lineWidth=3; c.stroke();
+                if(pc.k){c.fillStyle='gold';c.beginPath();c.arc(cl*w+w/2,r*h+h/2,10,0,7);c.fill();}
+            }
+        }
+        if(this.sP){c.strokeStyle='yellow';c.lineWidth=3;c.strokeRect(this.sP.c*w,this.sP.r*h,w,h);}
+        this.vM.forEach(m=>{c.strokeStyle='yellow';c.beginPath();c.arc(m.c*w+w/2,m.r*h+h/2,10,0,7);c.stroke();});
+    }
+}
+
+// --- 5. PIŠKVORKY (DOM) ---
+let pB=[], pH=[], pT='x';
+function initPisk(){
+    const d=document.getElementById('p-grid'); d.innerHTML=''; pB=[]; pH=[]; pT='x'; document.getElementById('g-stat').innerText='Na tahu: X';
+    for(let r=0;r<15;r++){pB[r]=[]; for(let c=0;c<15;c++){
+        pB[r][c]=0; let e=document.createElement('div'); e.className='cell'; e.id=`c${r}-${c}`;
+        e.onclick=()=>pClk(r,c); d.appendChild(e);
+    }}
+}
+function pClk(r,c){
+    if(pB[r][c]||!run)return; pB[r][c]=pT; pH.push({r,c,t:pT});
+    let e=document.getElementById(`c${r}-${c}`); e.innerText=pT.toUpperCase(); e.classList.add(pT);
+    if(chkW(r,c,pT)){endG(pT.toUpperCase()+" vyhrál!");return;}
+    pT=pT==='x'?'o':'x'; document.getElementById('g-stat').innerText='Na tahu: '+pT.toUpperCase();
+}
+function undoP(){if(!pH.length||!run)return; let l=pH.pop(); pB[l.r][l.c]=0; let e=document.getElementById(`c${l.r}-${l.c}`); e.innerText=''; e.classList.remove('x','o'); pT=l.t; document.getElementById('g-stat').innerText='Na tahu: '+pT.toUpperCase();}
+function chkW(r,c,p){
+    const D=[[0,1],[1,0],[1,1],[1,-1]];
+    for(let[dr,dc]of D){
+        let k=1;
+        for(let i=1;i<5;i++){let nr=r+dr*i,nc=c+dc*i; if(nr>=0&&nr<15&&nc>=0&&nc<15&&pB[nr][nc]===p)k++; else break;}
+        for(let i=1;i<5;i++){let nr=r-dr*i,nc=c-dc*i; if(nr>=0&&nr<15&&nc>=0&&nc<15&&pB[nr][nc]===p)k++; else break;}
+        if(k>=5)return 1;
+    } return 0;
+}
+</script>
+</body>
+</html>
