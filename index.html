@@ -1,229 +1,160 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Můj Herní Portál</title>
-    <style>
-        :root {
-            --bg-color: #1a1a2e;
-            --primary: #e94560;
-            --secondary: #0f3460;
-            --text-light: #ffffff;
-            --card-bg: #16213e;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-light);
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        /* --- Screens --- */
-        .screen { display: none; flex: 1; padding: 20px; flex-direction: column; align-items: center; }
-        .screen.active { display: flex; }
-
-        /* --- Typography & Buttons --- */
-        h1 { margin-bottom: 30px; font-size: 2.5rem; text-align: center; color: var(--primary); text-transform: uppercase; letter-spacing: 2px;}
-        h2 { margin-bottom: 20px; font-size: 2rem; color: #fff; }
-        
-        .btn {
-            background: var(--primary); color: white; border: none; padding: 12px 25px; font-size: 1.1rem;
-            border-radius: 8px; cursor: pointer; transition: 0.3s; text-transform: uppercase; font-weight: bold;
-            box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4); margin: 5px;
-        }
-        .btn:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(233, 69, 96, 0.6); }
-        .btn-secondary { background: var(--secondary); box-shadow: 0 4px 15px rgba(15, 52, 96, 0.4); }
-
-        /* --- Home Screen --- */
-        .games-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; width: 100%; max-width: 1000px; }
-        .game-card { background: var(--card-bg); border-radius: 15px; padding: 30px 20px; text-align: center; cursor: pointer; transition: 0.3s; border: 2px solid transparent; }
-        .game-card:hover { border-color: var(--primary); transform: translateY(-5px); }
-        .game-card h3 { font-size: 1.5rem; margin-bottom: 10px; }
-        .game-icon { font-size: 3rem; margin-bottom: 15px; }
-
-        /* --- Instructions Screen --- */
-        .instructions-box { background: var(--card-bg); padding: 30px; border-radius: 15px; max-width: 600px; width: 100%; text-align: center; }
-        .instruction-section { margin: 20px 0; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px; text-align: left;}
-        .instruction-section h4 { color: var(--primary); margin-bottom: 10px; }
-        #hs-disp { color: gold; font-weight: bold; font-size: 1.2rem; margin-bottom: 15px; display: none; }
-
-        /* --- Game Screen --- */
-        #game-container {
-            position: relative; width: 100%; max-width: 600px; aspect-ratio: 4/5;
-            display: flex; justify-content: center; align-items: center;
-            background: #000; border-radius: 10px; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.8);
-        }
-        canvas { display: block; width: 100%; height: 100%; object-fit: contain; background: var(--card-bg); }
-
-        /* --- Game Over Overlay --- */
-        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
-        .overlay.active { display: flex; }
-        .score-display { font-size: 2.5rem; color: var(--primary); margin-bottom: 20px; font-weight: bold;}
-
-        /* --- Piškvorky Specific --- */
-        #piskvorky-board { display: none; background: #222; gap: 2px; border: 2px solid #444; width: 100%; height: 100%; }
-        .p-cell { background: #eee; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; font-weight: bold; cursor: pointer; }
-        .p-cell.red { color: #ff3333; } .p-cell.blue { color: #3333ff; }
-
-        /* --- Mobile Controls --- */
-        .mobile-controls { display: none; width: 100%; max-width: 600px; justify-content: space-between; padding: 10px; margin-top: 10px; }
-        @media (pointer: coarse) { .mobile-controls.active { display: flex; } }
-        .m-btn { background: rgba(255,255,255,0.1); border: 2px solid #fff; color: white; border-radius: 50%; width: 60px; height: 60px; font-size: 20px;}
-        
-        #game-ui-bar { display: flex; width: 100%; max-width: 600px; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Profi Herní Portál</title>
+<style>
+:root{--bg:#0b0c10;--c1:#66fcf1;--c2:#ff00ff;--c3:#39ff14;--txt:#fff;}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;user-select:none;}
+body{background:linear-gradient(45deg,#0b0c10,#1f2833,#000,#112233);background-size:400% 400%;animation:bgA 15s ease infinite;color:var(--txt);display:flex;flex-direction:column;min-height:100vh;overflow:hidden;}
+@keyframes bgA {0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.screen{display:none;flex:1;padding:15px;flex-direction:column;align-items:center;width:100%;}
+.screen.active{display:flex;}
+h1{margin-bottom:15px;color:var(--c1);text-transform:uppercase;text-shadow:0 0 15px var(--c1);text-align:center;font-size:2.5rem;letter-spacing:2px;}
+.btn{background:rgba(17,17,17,0.8);color:var(--c1);border:2px solid var(--c1);padding:10px 20px;font-size:1.1rem;border-radius:8px;cursor:pointer;font-weight:bold;margin:5px;box-shadow:0 0 10px var(--c1);transition:0.3s;backdrop-filter:blur(5px);}
+.btn:hover{background:var(--c1);color:#000;}
+.btn-sec{color:var(--c2);border-color:var(--c2);box-shadow:0 0 10px var(--c2);}
+.btn-sec:hover{background:var(--c2);color:#000;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px;width:100%;max-width:900px;overflow-y:auto;padding-bottom:20px;z-index:2;}
+.card{background:rgba(31,40,51,0.8);backdrop-filter:blur(10px);border-radius:15px;padding:25px;text-align:center;cursor:pointer;border:1px solid rgba(102,252,241,0.3);transition:0.3s;box-shadow:0 8px 32px rgba(0,0,0,0.5);}
+.card:hover{border-color:var(--c1);box-shadow:0 0 20px rgba(102,252,241,0.6);transform:translateY(-5px);}
+.icon{font-size:3.5rem;margin-bottom:10px;text-shadow:0 0 15px rgba(255,255,255,0.4);}
+#game-box{position:relative;width:100%;max-width:500px;height:70vh;background:#000;border:2px solid var(--c1);border-radius:10px;box-shadow:0 0 20px var(--c1);display:flex;justify-content:center;align-items:center;overflow:hidden;}
+canvas{display:block;width:100%;height:100%;object-fit:fill;}
+#p-grid{display:none;grid-template-columns:repeat(15,1fr);width:100%;max-width:500px;aspect-ratio:1;background:var(--c1);gap:2px;padding:2px;box-shadow:0 0 20px var(--c1);}
+.cell{background:#111;display:flex;justify-content:center;align-items:center;font-size:1.8rem;font-weight:bold;cursor:pointer;aspect-ratio:1;overflow:hidden;line-height:1;}
+.cell.x{color:var(--c2);text-shadow:0 0 15px var(--c2);} .cell.o{color:var(--c1);text-shadow:0 0 15px var(--c1);}
+.overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:none;flex-direction:column;justify-content:center;align-items:center;z-index:10;}
+.overlay.active{display:flex;}
+#score{font-size:2.5rem;color:var(--c3);margin:5px 0;text-shadow:0 0 10px var(--c3);}
+.controls{display:none;width:100%;max-width:500px;justify-content:space-between;margin-top:15px;}
+@media(pointer:coarse){.controls.active{display:flex;}}
+.m-btn{background:rgba(102,252,241,0.1);border:2px solid var(--c1);color:var(--c1);border-radius:50%;width:60px;height:60px;font-size:24px;text-shadow:0 0 5px var(--c1);backdrop-filter:blur(5px);}
+.top-bar{width:100%;max-width:500px;display:flex;justify-content:space-between;margin-bottom:10px;}
+#hs-disp{color:gold;font-weight:bold;margin-bottom:15px;font-size:1.2rem;display:none;}
+</style>
 </head>
 <body>
 
-    <div id="screen-home" class="screen active">
-        <h1>Herní Portál</h1>
-        <div class="games-grid" id="games-grid"></div>
+<div id="home" class="screen active">
+    <h1>Herní Portál</h1>
+    <div class="grid" id="menu"></div>
+</div>
+
+<div id="intro" class="screen">
+    <h1 id="i-title"></h1>
+    <div id="hs-disp">Nejlepší skóre: <span id="hs-val">0</span></div>
+    <p id="i-desc" style="max-width:500px;text-align:center;margin-bottom:20px;font-size:1.1rem;"></p>
+    <div style="background:rgba(31,40,51,0.8);backdrop-filter:blur(5px);padding:20px;border-radius:10px;margin-bottom:20px;width:100%;max-width:500px;border:1px solid #333;">
+        <p style="margin-bottom:10px;">💻 <b>PC:</b> <span id="i-pc"></span></p>
+        <p>📱 <b>Mobil:</b> <span id="i-mob"></span></p>
     </div>
+    <div style="display:flex;gap:10px;"><button class="btn" onclick="startG()">HRÁT</button><button class="btn btn-sec" onclick="nav('home')">ZPĚT</button></div>
+</div>
 
-    <div id="screen-instructions" class="screen">
-        <h2 id="inst-title"></h2>
-        <div class="instructions-box">
-            <div id="hs-disp">Nejlepší skóre: <span id="hs-val">0</span></div>
-            <p id="inst-desc"></p>
-            <div class="instruction-section"><h4>💻 Ovládání PC:</h4><p id="inst-pc"></p></div>
-            <div class="instruction-section"><h4>📱 Ovládání Mobil:</h4><p id="inst-mob"></p></div>
-            <button class="btn" onclick="startCurrentGame()">HRÁT</button>
-            <button class="btn btn-secondary" onclick="showScreen('home')">Zpět</button>
-        </div>
-    </div>
-
-    <div id="screen-game" class="screen">
-        <div id="game-ui-bar">
-            <button class="btn btn-secondary" style="padding: 8px 15px; margin:0;" onclick="showScreen('home')">Domů</button>
-            <h3 id="game-status-text" style="font-size: 1.2rem; margin: 0;"></h3>
-            <div style="display:flex; gap:5px;">
-                <button class="btn btn-secondary" id="btn-undo" style="display:none; padding: 8px 15px; margin:0;" onclick="undoMove()">Zpět tah</button>
-                <button class="btn" style="padding: 8px 15px; margin:0;" onclick="startCurrentGame()">Restart</button>
-            </div>
-        </div>
-
-        <div id="game-container">
-            <canvas id="cvs"></canvas>
-            <div id="piskvorky-board"></div>
-            
-            <div id="game-over-overlay" class="overlay">
-                <h2 id="winner-text">Konec Hry</h2>
-                <div class="score-display" id="final-score"></div>
-                <div id="new-hs" style="color:gold; display:none; font-weight:bold; margin-bottom:15px;">Nové nejlepší skóre!</div>
-                <button class="btn" onclick="startCurrentGame()">Hrát Znovu</button>
-                <button class="btn btn-secondary" onclick="showScreen('home')">Zpět domů</button>
-            </div>
-        </div>
-
-        <div id="mobile-controls" class="mobile-controls">
-            <div style="display:flex; gap:10px;"><button class="m-btn" id="m-btn-left">◀</button><button class="m-btn" id="m-btn-right">▶</button></div>
-            <button class="m-btn" id="m-btn-action" style="border-color:var(--primary);">A</button>
+<div id="game" class="screen">
+    <div class="top-bar" id="t-bar">
+        <button class="btn btn-sec" style="padding:6px 12px;font-size:0.9rem;" onclick="nav('home')">Domů</button>
+        <span id="g-stat" style="font-weight:bold;line-height:2.2;font-size:1rem;text-shadow:0 0 5px #fff;"></span>
+        <div style="display:flex;gap:5px;">
+            <button class="btn" id="btn-undo" style="display:none;padding:6px 12px;font-size:0.9rem;" onclick="undoP()">Zpět</button>
+            <button class="btn btn-sec" style="padding:6px 12px;font-size:0.9rem;" onclick="startG()">Restart</button>
         </div>
     </div>
+    <div id="game-box">
+        <canvas id="cvs"></canvas>
+        <div id="p-grid"></div>
+        <div id="over" class="overlay">
+            <h2 id="e-title" style="color:var(--c2);text-shadow:0 0 10px var(--c2);font-size:2rem;">Konec</h2>
+            <div id="score"></div>
+            <div id="new-hs" style="color:gold;display:none;margin-bottom:10px;font-weight:bold;">Nové nejlepší skóre!</div>
+            <div style="display:flex;gap:10px;margin-top:10px;"><button class="btn" onclick="startG()">ZNOVU</button><button class="btn btn-sec" onclick="nav('home')">DOMŮ</button></div>
+        </div>
+    </div>
+    <div id="ctrls" class="controls">
+        <div style="display:flex;gap:15px;"><button class="m-btn" id="bl">◀</button><button class="m-btn" id="br">▶</button></div>
+        <button class="m-btn" id="ba" style="border-color:var(--c2);color:var(--c2);">A</button>
+    </div>
+</div>
 
 <script>
-const gamesData = [
-    { id: 1, title: 'Tetris', icon: '🧱', desc: 'Klasický Tetris s čistým designem.', pc: 'Šipky: L/P pohyb, Nahoru rotace, Dolů pád', mob: 'L/P pohyb, A rotace' },
-    { id: 2, title: 'Flappy Bird', icon: '🦅', desc: 'Skoč a leť mezi sloupy.', pc: 'Mezerník pro skok.', mob: 'Tlačítko A.' },
-    { id: 3, title: 'Dino Run', icon: '🦖', desc: 'Přeskakuj kaktusy a přežij co nejdéle.', pc: 'Mezerník pro skok.', mob: 'Tlačítko A.' },
-    { id: 4, title: 'Kulička', icon: '🏓', desc: 'Odrážej kuličku plošinou. Kulička zrychluje!', pc: 'Šipky L/P.', mob: 'Šipky na displeji.' },
-    { id: 5, title: 'Piškvorky', icon: '❌', desc: '5 znaků v řadě (Červené X, Modré O).', pc: 'Myš.', mob: 'Klepnutí prstem.' },
-    { id: 6, title: 'Fotbal Pong', icon: '⚽', desc: 'Pro 2 hráče. Kdo dá 5 gólů, vyhrává.', pc: 'H1: W/S, H2: Šipky Nahoru/Dolů.', mob: 'Polož mobil, šipky pro každého.' },
-    { id: 7, title: 'Dáma', icon: '♟️', desc: 'Česká dáma (dvojskoky, fouknutí, létání dámou). Kdo nemůže táhnout, prohrál.', pc: 'Myš.', mob: 'Klepnutí prstem.' }
+const G=[
+ {id:1,t:'Tetris',i:'🧱',d:'Skládej bloky, padají dolů.',pc:'Šipky: L/P pohyb, Nahoru rotace, Dolů pád',m:'L/P pohyb, A rotace'},
+ {id:2,t:'Flappy Bird',i:'🦅',d:'Skoč a leť mezi sloupy.',pc:'Mezerník',m:'Tlačítko A'},
+ {id:3,t:'Dino Run',i:'🦖',d:'Přeskakuj kaktusy a přežij.',pc:'Mezerník',m:'Tlačítko A'},
+ {id:4,t:'Kulička',i:'🏓',d:'Odrážej kuličku, bude zrychlovat!',pc:'Šipky L/P',m:'Šipky na displeji'},
+ {id:5,t:'Piškvorky',i:'❌',d:'5 v řadě (X a O).',pc:'Myš',m:'Klepnutí na pole'},
+ {id:6,t:'Fotbal Pong',i:'⚽',d:'Pro 2 hráče.',pc:'H1: W/S, H2: Nahoru/Dolů',m:'Polož mobil, šipky pro každého'},
+ {id:7,t:'Dáma',i:'♟️',d:'Kompletní česká pravidla s dámou!',pc:'Myš',m:'Klepnutí na displej'}
 ];
 
-let currentGameId = null, gameLoop = null, isPlaying = false, gObj = null;
-const cvs = document.getElementById('cvs'), ctx = cvs.getContext('2d');
-cvs.width = 400; cvs.height = 500;
+let cId=0, loop=0, run=0, gObj=null;
+const cvs=document.getElementById('cvs'), ctx=cvs.getContext('2d');
+cvs.width=400; cvs.height=500;
+let k={}; window.onkeydown=e=>k[e.code]=1; window.onkeyup=e=>k[e.code]=0;
+let mL=0, mR=0, mA=0;
+const bBtn=(id,v,ke)=>{const b=document.getElementById(id); const on=e=>{e.preventDefault();window[v]=1;k[ke]=1;}; const off=e=>{e.preventDefault();window[v]=0;k[ke]=0;}; b.ontouchstart=on; b.ontouchend=off; b.onmousedown=on; b.onmouseup=off;};
+bBtn('bl','mL','ArrowLeft'); bBtn('br','mR','ArrowRight'); bBtn('ba','mA','Space');
 
-let keys = {}; window.onkeydown = e => keys[e.code] = 1; window.onkeyup = e => keys[e.code] = 0;
-let mL = 0, mR = 0, mA = 0;
-const bindBtn = (id, v, ke) => {
-    const b = document.getElementById(id);
-    const on = e => { e.preventDefault(); window[v] = 1; keys[ke] = 1; };
-    const off = e => { e.preventDefault(); window[v] = 0; keys[ke] = 0; };
-    b.ontouchstart = on; b.ontouchend = off; b.onmousedown = on; b.onmouseup = off;
-};
-bindBtn('m-btn-left', 'mL', 'ArrowLeft'); bindBtn('m-btn-right', 'mR', 'ArrowRight'); bindBtn('m-btn-action', 'mA', 'Space');
+function getHS(id){ return parseInt(localStorage.getItem('hs_'+id))||0; }
+function setHS(id,s){ localStorage.setItem('hs_'+id,s); }
 
-function getHS(id) { return parseInt(localStorage.getItem('hs_' + id)) || 0; }
-function setHS(id, s) { localStorage.setItem('hs_' + id, s); }
-
-function showScreen(sn) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(`screen-${sn}`).classList.add('active');
-    cancelAnimationFrame(gameLoop); isPlaying = false;
-}
-
-const grid = document.getElementById('games-grid');
-gamesData.forEach(g => {
-    let c = document.createElement('div'); c.className = 'game-card';
-    c.innerHTML = `<div class="game-icon">${g.icon}</div><h3>${g.title}</h3>`;
-    c.onclick = () => {
-        currentGameId = g.id; document.getElementById('inst-title').innerText = g.title;
-        document.getElementById('inst-desc').innerText = g.desc; document.getElementById('inst-pc').innerText = g.pc; document.getElementById('inst-mob').innerText = g.mob;
-        let hd = document.getElementById('hs-disp');
-        if (g.id <= 4) { hd.style.display = 'block'; document.getElementById('hs-val').innerText = getHS(g.id); } else hd.style.display = 'none';
-        showScreen('instructions');
+function nav(s){document.querySelectorAll('.screen').forEach(e=>e.classList.remove('active'));document.getElementById(s).classList.add('active');cancelAnimationFrame(loop);run=0;}
+G.forEach(g=>{
+    let d=document.createElement('div'); d.className='card'; d.innerHTML=`<div class="icon">${g.i}</div><h2>${g.t}</h2>`;
+    d.onclick=()=>{
+        cId=g.id; document.getElementById('i-title').innerText=g.t; document.getElementById('i-desc').innerText=g.d; document.getElementById('i-pc').innerText=g.pc; document.getElementById('i-mob').innerText=g.m; 
+        let hd=document.getElementById('hs-disp');
+        if(cId<=4){hd.style.display='block'; document.getElementById('hs-val').innerText=getHS(cId);} else hd.style.display='none';
+        nav('intro');
     };
-    grid.appendChild(c);
+    document.getElementById('menu').appendChild(d);
 });
 
-function startCurrentGame() {
-    showScreen('game'); document.getElementById('game-over-overlay').classList.remove('active');
-    document.getElementById('new-hs').style.display = 'none';
-    cvs.style.display = currentGameId === 5 ? 'none' : 'block';
-    document.getElementById('piskvorky-board').style.display = currentGameId === 5 ? 'grid' : 'none';
-    document.getElementById('btn-undo').style.display = currentGameId === 5 ? 'block' : 'none';
-    document.getElementById('mobile-controls').classList.toggle('active', currentGameId !== 5 && currentGameId !== 7);
-    document.getElementById('m-btn-action').style.display = (currentGameId === 4 || currentGameId === 6) ? 'none' : 'block';
-    document.getElementById('game-status-text').innerText = '';
-    
-    isPlaying = true;
-    if (currentGameId === 1) gObj = new Tetris(); else if (currentGameId === 2) gObj = new Flappy();
-    else if (currentGameId === 3) gObj = new Dino(); else if (currentGameId === 4) gObj = new Pong();
-    else if (currentGameId === 5) { initPiskvorky(); return; } else if (currentGameId === 6) gObj = new P2();
-    else if (currentGameId === 7) gObj = new Checkers();
+function startG(){
+    nav('game'); document.getElementById('over').classList.remove('active');
+    document.getElementById('new-hs').style.display='none';
+    cvs.style.display=cId===5?'none':'block'; document.getElementById('p-grid').style.display=cId===5?'grid':'none';
+    document.getElementById('btn-undo').style.display=cId===5?'block':'none';
+    document.getElementById('ctrls').classList.toggle('active', cId!==5&&cId!==7);
+    document.getElementById('ba').style.display=(cId===4||cId===6)?'none':'block';
+    document.getElementById('g-stat').innerText='';
+    run=1;
+    if(cId===1) gObj=new Tetris(); if(cId===2) gObj=new Flappy(); if(cId===3) gObj=new Dino();
+    if(cId===4) gObj=new Pong(); if(cId===5) {initPisk(); return;} if(cId===6) gObj=new P2(); if(cId===7) gObj=new Checkers();
     loopF();
 }
-
-function showGameOver(s, title = "Konec Hry", isScore = true) {
-    isPlaying = false; document.getElementById('winner-text').innerText = title;
+function endG(s,t="Konec Hry", isScore=true){
+    run=0; document.getElementById('e-title').innerText=t; 
     let dispScore = s;
-    if (currentGameId <= 4 && isScore) {
-        let numS = Math.floor(s), hs = getHS(currentGameId);
-        if (numS > hs) { setHS(currentGameId, numS); document.getElementById('new-hs').style.display = 'block'; }
+    if(cId<=4 && isScore){
+        let numS = Math.floor(s);
+        let hs = getHS(cId);
+        if(numS > hs){ setHS(cId, numS); document.getElementById('new-hs').style.display='block'; }
         dispScore = "Skóre: " + numS;
     }
-    document.getElementById('final-score').innerText = isScore ? dispScore : s;
-    document.getElementById('game-over-overlay').classList.add('active');
+    document.getElementById('score').innerText=dispScore; 
+    document.getElementById('over').classList.add('active');
 }
+function loopF(){if(!run)return; ctx.clearRect(0,0,400,500); gObj.u(); gObj.d(ctx); loop=requestAnimationFrame(loopF);}
 
-function loopF() { if (!isPlaying) return; ctx.clearRect(0, 0, 400, 500); gObj.u(); gObj.d(ctx); gameLoop = requestAnimationFrame(loopF); }
-
-// --- 1. TETRIS (Tvůj čistý design) ---
+// --- 1. TETRIS (Klasický čistý design) ---
 const SH=[[],[[1,1,1,1]],[[1,1],[1,1]],[[0,1,0],[1,1,1]],[[1,1,0],[0,1,1]],[[0,1,1],[1,1,0]],[[1,0,0],[1,1,1]],[[0,0,1],[1,1,1]]];
-const CLS=['#1a1a2e','#e94560','#3498db','#2ECC71','#f4a261','#9b59b6','#f1c40f','#0f3460']; // Barvy ladící s portálem
+const CLS=['#111','#0cf','#00f','#fa0','#ff0','#0c0','#a0f','#f00']; 
 class Tetris{
     constructor(){this.b=Array.from({length:20},()=>Array(10).fill(0)); this.sc=0; this.f=0; this.spawn(); this.kd=0;}
-    spawn(){let t=Math.floor(Math.random()*7)+1; this.p={m:SH[t], x:3, y:0, c:t}; if(this.col(0,0)) showGameOver(this.sc);}
+    spawn(){let t=Math.floor(Math.random()*7)+1; this.p={m:SH[t], x:3, y:0, c:t}; if(this.col(0,0)) endG(this.sc);}
     col(dx,dy,m=this.p.m){for(let r=0;r<m.length;r++)for(let c=0;c<m[r].length;c++)if(m[r][c]){let nx=this.p.x+c+dx, ny=this.p.y+r+dy; if(nx<0||nx>=10||ny>=20||(ny>=0&&this.b[ny][nx])) return 1;} return 0;}
     rot(){let nm=this.p.m[0].map((_,i)=>this.p.m.map(r=>r[i]).reverse()); if(!this.col(0,0,nm)) this.p.m=nm;}
     u(){
         if(this.f%5===0){
-            if((keys['ArrowLeft']||mL)&&!this.kd&&!this.col(-1,0)) this.p.x--;
-            if((keys['ArrowRight']||mR)&&!this.kd&&!this.col(1,0)) this.p.x++;
-            if((keys['ArrowUp']||mA)&&!this.kd) this.rot();
-            this.kd=(keys['ArrowLeft']||keys['ArrowRight']||keys['ArrowUp']||mL||mR||mA);
+            if((k.ArrowLeft||mL)&&!this.kd&&!this.col(-1,0)) this.p.x--;
+            if((k.ArrowRight||mR)&&!this.kd&&!this.col(1,0)) this.p.x++;
+            if((k.ArrowUp||mA)&&!this.kd) this.rot();
+            this.kd=(k.ArrowLeft||k.ArrowRight||k.ArrowUp||mL||mR||mA);
         }
-        if(!keys['ArrowLeft']&&!keys['ArrowRight']&&!keys['ArrowUp']&&!mL&&!mR&&!mA) this.kd=0;
-        if(this.f%(keys['ArrowDown']?4:30)===0){
+        if(!k.ArrowLeft&&!k.ArrowRight&&!k.ArrowUp&&!mL&&!mR&&!mA) this.kd=0;
+        if(this.f%(k.ArrowDown?4:30)===0){
             if(!this.col(0,1)) this.p.y++; else {
                 for(let r=0;r<this.p.m.length;r++)for(let c=0;c<this.p.m[r].length;c++)if(this.p.m[r][c]) this.b[this.p.y+r][this.p.x+c]=this.p.c;
                 let cL=0; this.b=this.b.filter(r=>{let f=r.every(v=>v); if(f)cL++; return !f;});
@@ -232,29 +163,34 @@ class Tetris{
             }
         } this.f++;
     }
+    fB(c,x,y,v){
+        c.fillStyle=CLS[v]; c.fillRect(x,y,20,20);
+        c.strokeStyle='#000'; c.lineWidth=2; c.strokeRect(x+1,y+1,18,18);
+        c.fillStyle='rgba(255,255,255,0.4)'; c.fillRect(x+2,y+2,16,2); c.fillRect(x+2,y+2,2,16);
+    }
     d(c){
-        c.fillStyle='#16213e'; c.fillRect(50,0,200,400); // Pozadí herní plochy
-        c.strokeStyle='#1a1a2e'; c.lineWidth=2; for(let i=0;i<10;i++)for(let j=0;j<20;j++) c.strokeRect(50+i*20,j*20,20,20);
-        for(let r=0;r<20;r++)for(let cl=0;cl<10;cl++)if(this.b[r][cl]){c.fillStyle=CLS[this.b[r][cl]]; c.fillRect(50+cl*20,r*20,20,20); c.strokeRect(50+cl*20,r*20,20,20);}
-        c.fillStyle=CLS[this.p.c]; for(let r=0;r<this.p.m.length;r++)for(let cl=0;cl<this.p.m[r].length;cl++)if(this.p.m[r][cl]){ c.fillRect(50+(this.p.x+cl)*20,(this.p.y+r)*20,20,20); c.strokeRect(50+(this.p.x+cl)*20,(this.p.y+r)*20,20,20);}
-        c.fillStyle='#fff'; c.font='bold 20px Arial'; c.fillText("Skóre:", 260, 30); c.fillText(this.sc, 260, 60);
+        c.fillStyle='#222'; c.fillRect(50,0,200,400); 
+        c.strokeStyle='#111'; c.lineWidth=1; for(let i=0;i<10;i++)for(let j=0;j<20;j++) c.strokeRect(50+i*20,j*20,20,20);
+        for(let r=0;r<20;r++)for(let cl=0;cl<10;cl++)if(this.b[r][cl]) this.fB(c,50+cl*20,r*20,this.b[r][cl]);
+        for(let r=0;r<this.p.m.length;r++)for(let cl=0;cl<this.p.m[r].length;cl++)if(this.p.m[r][cl]) this.fB(c,50+(this.p.x+cl)*20,(this.p.y+r)*20,this.p.c);
+        c.fillStyle='#fff'; c.font='20px Arial'; c.fillText("Skóre: "+this.sc, 260, 30);
     }
 }
 
-// --- 2. FLAPPY ---
+// --- 2. FLAPPY (Bez neonu) ---
 class Flappy{
     constructor(){this.y=250;this.v=0;this.p=[];this.s=0;this.f=0;this.started=0;}
     u(){
-        if(!this.started){ if(keys['Space']||mA){this.started=1; this.v=-7;} return; }
+        if(!this.started){ if(k.Space||mA){this.started=1; this.v=-7;} return; }
         this.v+=0.5; this.y+=this.v;
-        if((keys['Space']||mA)&&this.v>0){this.v=-7;} 
+        if((k.Space||mA)&&this.v>0){this.v=-7;} 
         if(this.f%90===0) this.p.push({x:400,y:Math.random()*200+100, pass:0});
         this.p.forEach(p=>{ 
             p.x-=3; 
-            if(50>p.x&&20<p.x+50&&(this.y<p.y-70||this.y>p.y+70))showGameOver(this.s); 
+            if(50>p.x&&20<p.x+50&&(this.y<p.y-70||this.y>p.y+70))endG(this.s); 
             if(p.x<50 && !p.pass){this.s++; p.pass=1;}
         });
-        if(this.y>500||this.y<0) showGameOver(this.s); this.p=this.p.filter(p=>p.x>-50); this.f++;
+        if(this.y>500||this.y<0) endG(this.s); this.p=this.p.filter(p=>p.x>-50); this.f++;
     }
     d(c){
         c.fillStyle='#87CEEB';c.fillRect(0,0,400,500); 
@@ -262,42 +198,42 @@ class Flappy{
         this.p.forEach(p=>{
             c.fillRect(p.x,0,50,p.y-70); c.strokeRect(p.x,0,50,p.y-70);
             c.fillRect(p.x,p.y+70,50,500); c.strokeRect(p.x,p.y+70,50,500);
-        });
+        }); 
         c.font='35px Arial';c.fillText('🦅',20,this.y); 
-        c.fillStyle='#fff'; c.font='bold 30px Arial'; c.fillText(this.s,10,40);
-        if(!this.started){c.fillStyle='#0f3460';c.font='bold 20px Arial';c.fillText('Klikni pro skok!', 120, 200);}
+        c.fillStyle='#fff';c.font='bold 30px Arial';c.fillText(this.s,10,40);
+        if(!this.started){c.fillStyle='#111';c.font='bold 20px Arial';c.fillText('Klikni pro skok!', 120, 200);}
     }
 }
 
-// --- 3. DINO ---
+// --- 3. DINO (Bez neonu) ---
 class Dino{
     constructor(){this.y=350;this.v=0;this.o=[];this.s=0;this.f=0;this.sp=5;}
     u(){
         this.v+=0.6; this.y+=this.v; if(this.y>350){this.y=350;this.v=0;}
-        if((keys['Space']||mA)&&this.y===350)this.v=-12;
+        if((k.Space||mA)&&this.y===350)this.v=-12;
         if(this.f%(Math.floor(Math.random()*50)+50)===0) this.o.push({x:400,w:30,h:40});
-        this.o.forEach(o=>{ o.x-=this.sp; if(50<o.x+o.w&&80>o.x&&this.y+30>380-o.h)showGameOver(this.s); });
+        this.o.forEach(o=>{ o.x-=this.sp; if(50<o.x+o.w&&80>o.x&&this.y+30>380-o.h)endG(this.s); });
         this.o=this.o.filter(o=>o.x>-50); this.s+=0.05; this.sp+=0.002; this.f++;
     }
     d(c){
-        c.fillStyle='#16213e';c.fillRect(0,0,400,500);
-        c.fillStyle='#e94560';c.fillRect(0,380,400,3); 
+        c.fillStyle='#1f2833';c.fillRect(0,0,400,500); 
+        c.fillStyle='#e94560'; c.fillRect(0,380,400,3); 
         c.font='40px Arial';c.fillText('🦖',40,this.y+35); 
         this.o.forEach(o=>{ c.font='35px Arial'; c.fillText('🌵', o.x, 380); }); 
-        c.fillStyle='#fff'; c.font='bold 20px Arial'; c.fillText(Math.floor(this.s),10,40);
+        c.fillStyle='#fff';c.font='bold 20px Arial';c.fillText(Math.floor(this.s),10,40);
     }
 }
 
-// --- 4. KULIČKA ---
+// --- 4. KULIČKA (Bez neonu) ---
 class Pong{
     constructor(){this.px=150;this.bx=200;this.by=200;this.vx=3;this.vy=-3;this.s=0;}
     u(){
-        if(keys['ArrowLeft']||mL)this.px-=6; if(keys['ArrowRight']||mR)this.px+=6;
+        if(k.ArrowLeft||mL)this.px-=6; if(k.ArrowRight||mR)this.px+=6;
         if(this.px<0)this.px=0; if(this.px>300)this.px=300;
         this.bx+=this.vx; this.by+=this.vy;
         if(this.bx<5||this.bx>395)this.vx*=-1; if(this.by<5)this.vy*=-1;
         if(this.by>470&&this.by<480&&this.bx>this.px&&this.bx<this.px+100){this.vy=-Math.abs(this.vy)*1.05; this.vx*=1.05; this.by=470; this.s++;}
-        if(this.by>500)showGameOver(this.s);
+        if(this.by>500)endG(this.s);
     }
     d(c){
         c.fillStyle='#16213e'; c.fillRect(0,0,400,500);
@@ -307,21 +243,21 @@ class Pong{
     }
 }
 
-// --- 6. FOTBAL PONG ---
+// --- 6. FOTBAL PONG (Bez neonu) ---
 class P2{
     constructor(){this.s1=0;this.s2=0;this.r();}
     r(){this.y1=200;this.y2=200;this.bx=200;this.by=250;this.vx=(Math.random()>0.5?3:-3);this.vy=3;this.w=60;}
     u(){
         if(this.w>0){this.w--; return;}
-        if(keys['KeyW']||mL)this.y1-=5; if(keys['KeyS']||mA)this.y1+=5; 
-        if(keys['ArrowUp']||keys['Space'])this.y2-=5; if(keys['ArrowDown']||mR)this.y2+=5;
+        if(k.KeyW||mL)this.y1-=5; if(k.KeyS||mA)this.y1+=5; 
+        if(k.ArrowUp||k.Space)this.y2-=5; if(k.ArrowDown||mR)this.y2+=5;
         this.y1=Math.max(0,Math.min(420,this.y1)); this.y2=Math.max(0,Math.min(420,this.y2));
         this.bx+=this.vx; this.by+=this.vy;
         if(this.by<5||this.by>495)this.vy*=-1;
         if(this.bx<20&&this.by>this.y1&&this.by<this.y1+80){this.vx=Math.abs(this.vx)*1.05;this.bx=20;}
         if(this.bx>380&&this.by>this.y2&&this.by<this.y2+80){this.vx=-Math.abs(this.vx)*1.05;this.bx=380;}
         if(this.bx<0){this.s2++;this.r();} if(this.bx>400){this.s1++;this.r();}
-        if(this.s1>4)showGameOver(this.s1+"-"+this.s2,"Modrá Vyhrála", false); if(this.s2>4)showGameOver(this.s1+"-"+this.s2,"Červená Vyhrála", false);
+        if(this.s1>4)endG(this.s1+"-"+this.s2,"Modrá Vyhrála", false); if(this.s2>4)endG(this.s1+"-"+this.s2,"Červená Vyhrála", false);
     }
     d(c){
         c.fillStyle='#16213e'; c.fillRect(0,0,400,500);
@@ -333,7 +269,7 @@ class P2{
     }
 }
 
-// --- 7. DÁMA (S detekcí prohry při zablokování) ---
+// --- 7. DÁMA (Bez neonu, plná pravidla vč. zablokování) ---
 class Checkers{
     constructor(){
         // 1=Modrý, 2=Červený, 3=Modrá Dáma, 4=Červená Dáma
@@ -343,24 +279,19 @@ class Checkers{
         cvs.onmousedown=e=>this.c(e.offsetX,e.offsetY);
         cvs.ontouchstart=e=>{let r=cvs.getBoundingClientRect();this.c(e.touches[0].clientX-r.left,e.touches[0].clientY-r.top);};
     }
-    upd(){ 
-        const st = document.getElementById('game-status-text');
-        st.innerText="Hraje: "+(this.t===1?"Modrá":"Červená"); 
-        st.style.color=this.t===1?"#3498db":"#e94560"; 
-    }
+    upd(){ document.getElementById('g-stat').innerText="Hraje: "+(this.t===1?"Modrá":"Červená"); document.getElementById('g-stat').style.color=this.t===1?"#3498db":"#e94560"; }
     
-    // Kontrola zablokování hráče
     chkL(){
-        let canMove = false;
+        let canMove=false;
         for(let i=0;i<8;i++){
             for(let j=0;j<8;j++){
                 if(this.b[i][j] && (this.b[i][j]%2||2)===this.t){
-                    if(this.getJ(i,j).length > 0 || this.getM(i,j).length > 0) { canMove=true; break; }
+                    if(this.getJ(i,j).length>0 || this.getM(i,j).length>0){canMove=true;break;}
                 }
             }
-            if(canMove) break;
+            if(canMove)break;
         }
-        if(!canMove) showGameOver("", (this.t===1?"Červená":"Modrá") + " vyhrála (soupeř nemá tah)!", false);
+        if(!canMove) endG("", (this.t===1?"Červená":"Modrá")+" vyhrála (soupeř bez tahu)!", false);
     }
 
     getJ(r,c){ 
@@ -459,36 +390,29 @@ class Checkers{
 }
 
 // --- 5. PIŠKVORKY (DOM) ---
-let pBoard = [], pHistory = [], pTurn = 'X';
-function initPiskvorky() {
-    pBoard = Array(15).fill(null).map(() => Array(15).fill(null)); pHistory = []; pTurn = 'X';
-    document.getElementById('game-status-text').innerText = 'Na tahu: X'; document.getElementById('game-status-text').style.color = '#ff3333';
-    const board = document.getElementById('piskvorky-board'); board.innerHTML = ''; board.style.gridTemplateColumns = 'repeat(15, 1fr)';
-    for(let r=0; r<15; r++) for(let c=0; c<15; c++) {
-        let cell = document.createElement('div'); cell.className = 'p-cell'; cell.id = `c-${r}-${c}`;
-        cell.onclick = () => piskClick(r, c); board.appendChild(cell);
-    }
+let pB=[], pH=[], pT='x';
+function initPisk(){
+    const d=document.getElementById('p-grid'); d.innerHTML=''; pB=[]; pH=[]; pT='x'; document.getElementById('g-stat').innerText='Na tahu: X'; document.getElementById('g-stat').style.color="var(--c2)";
+    for(let r=0;r<15;r++){pB[r]=[]; for(let c=0;c<15;c++){
+        pB[r][c]=0; let e=document.createElement('div'); e.className='cell'; e.id=`c${r}-${c}`;
+        e.onclick=()=>pClk(r,c); d.appendChild(e);
+    }}
 }
-function piskClick(r, c) {
-    if (pBoard[r][c] !== null || !isPlaying) return;
-    pBoard[r][c] = pTurn; pHistory.push({r, c, p: pTurn});
-    let cell = document.getElementById(`c-${r}-${c}`); cell.innerText = pTurn; cell.classList.add(pTurn === 'X' ? 'red' : 'blue');
-    if (checkPWin(r, c, pTurn)) { showGameOver(null, `Vítěz: ${pTurn}!`, false); return; }
-    pTurn = pTurn === 'X' ? 'O' : 'X'; document.getElementById('game-status-text').innerText = `Na tahu: ${pTurn}`; document.getElementById('game-status-text').style.color = pTurn === 'X' ? '#ff3333' : '#3333ff';
+function pClk(r,c){
+    if(pB[r][c]||!run)return; pB[r][c]=pT; pH.push({r,c,t:pT});
+    let e=document.getElementById(`c${r}-${c}`); e.innerText=pT.toUpperCase(); e.classList.add(pT);
+    if(chkW(r,c,pT)){endG(pT.toUpperCase()+" vyhrál!","Konec", false);return;}
+    pT=pT==='x'?'o':'x'; document.getElementById('g-stat').innerText='Na tahu: '+pT.toUpperCase(); document.getElementById('g-stat').style.color=pT==='x'?"var(--c2)":"var(--c1)";
 }
-function undoMove() {
-    if (pHistory.length === 0 || !isPlaying) return;
-    let last = pHistory.pop(); pBoard[last.r][last.c] = null;
-    let cell = document.getElementById(`c-${last.r}-${last.c}`); cell.innerText = ''; cell.classList.remove('red', 'blue');
-    pTurn = last.p; document.getElementById('game-status-text').innerText = `Na tahu: ${pTurn}`; document.getElementById('game-status-text').style.color = pTurn === 'X' ? '#ff3333' : '#3333ff';
-}
-function checkPWin(r, c, p) {
-    for (let [dr, dc] of [[0,1],[1,0],[1,1],[1,-1]]) {
-        let k = 1;
-        for (let i=1; i<5; i++) { let nr = r+dr*i, nc = c+dc*i; if(nr>=0&&nr<15&&nc>=0&&nc<15&&pBoard[nr][nc]===p) k++; else break; }
-        for (let i=1; i<5; i++) { let nr = r-dr*i, nc = c-dc*i; if(nr>=0&&nr<15&&nc>=0&&nc<15&&pBoard[nr][nc]===p) k++; else break; }
-        if (k >= 5) return true;
-    } return false;
+function undoP(){if(!pH.length||!run)return; let l=pH.pop(); pB[l.r][l.c]=0; let e=document.getElementById(`c${l.r}-${l.c}`); e.innerText=''; e.classList.remove('x','o'); pT=l.t; document.getElementById('g-stat').innerText='Na tahu: '+pT.toUpperCase(); document.getElementById('g-stat').style.color=pT==='x'?"var(--c2)":"var(--c1)";}
+function chkW(r,c,p){
+    const D=[[0,1],[1,0],[1,1],[1,-1]];
+    for(let[dr,dc]of D){
+        let k=1;
+        for(let i=1;i<5;i++){let nr=r+dr*i,nc=c+dc*i; if(nr>=0&&nr<15&&nc>=0&&nc<15&&pB[nr][nc]===p)k++; else break;}
+        for(let i=1;i<5;i++){let nr=r-dr*i,nc=c-dc*i; if(nr>=0&&nr<15&&nc>=0&&nc<15&&pB[nr][nc]===p)k++; else break;}
+        if(k>=5)return 1;
+    } return 0;
 }
 </script>
 </body>
