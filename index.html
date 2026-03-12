@@ -2,78 +2,82 @@
 <html lang="cs">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Herní Portál - 7 Her</title>
+<title>Neon Herní Portál</title>
 <style>
-:root{--bg:#1a1a2e;--pri:#e94560;--sec:#0f3460;--txt:#fff;}
-*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif;user-select:none;}
+:root{--bg:#0b0c10;--c1:#66fcf1;--c2:#ff00ff;--c3:#39ff14;--txt:#fff;}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;user-select:none;}
 body{background:var(--bg);color:var(--txt);display:flex;flex-direction:column;min-height:100vh;overflow:hidden;}
 .screen{display:none;flex:1;padding:15px;flex-direction:column;align-items:center;width:100%;}
 .screen.active{display:flex;}
-h1{margin-bottom:15px;color:var(--pri);text-transform:uppercase;}
-.btn{background:var(--pri);color:#fff;border:none;padding:10px 20px;font-size:1.1rem;border-radius:5px;cursor:pointer;font-weight:bold;margin:5px;}
-.btn-sec{background:var(--sec);}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;width:100%;max-width:900px;overflow-y:auto;}
-.card{background:#16213e;border-radius:10px;padding:15px;text-align:center;cursor:pointer;border:2px solid transparent;}
-.card:hover{border-color:var(--pri);}
-.icon{font-size:2.5rem;}
-#game-box{position:relative;width:100%;max-width:500px;aspect-ratio:4/5;background:#000;border-radius:8px;box-shadow:0 0 15px #000;display:flex;justify-content:center;align-items:center;overflow:hidden;}
-canvas{display:block;width:100%;height:100%;object-fit:contain;background:#222;}
-#p-grid{display:none;grid-template-columns:repeat(15,1fr);width:100%;height:100%;background:#333;gap:1px;}
-.cell{background:#eee;display:flex;justify-content:center;align-items:center;font-size:1.2rem;font-weight:bold;cursor:pointer;}
-.cell.x{color:#e94560;} .cell.o{color:#0f3460;}
-.overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:none;flex-direction:column;justify-content:center;align-items:center;z-index:10;}
+h1{margin-bottom:15px;color:var(--c1);text-transform:uppercase;text-shadow:0 0 10px var(--c1);text-align:center;}
+.btn{background:#111;color:var(--c1);border:2px solid var(--c1);padding:12px 25px;font-size:1.1rem;border-radius:8px;cursor:pointer;font-weight:bold;margin:5px;box-shadow:0 0 10px var(--c1);transition:0.3s;}
+.btn:hover{background:var(--c1);color:#000;}
+.btn-sec{color:var(--c2);border-color:var(--c2);box-shadow:0 0 10px var(--c2);}
+.btn-sec:hover{background:var(--c2);color:#000;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;width:100%;max-width:900px;overflow-y:auto;padding-bottom:20px;}
+.card{background:#1f2833;border-radius:12px;padding:20px;text-align:center;cursor:pointer;border:2px solid #333;transition:0.3s;box-shadow:0 0 10px rgba(0,0,0,0.5);}
+.card:hover{border-color:var(--c1);box-shadow:0 0 20px rgba(102,252,241,0.5);transform:translateY(-3px);}
+.icon{font-size:3rem;margin-bottom:10px;text-shadow:0 0 10px rgba(255,255,255,0.5);}
+#game-box{position:relative;width:100%;max-width:500px;height:70vh;background:#000;border:2px solid var(--c1);border-radius:10px;box-shadow:0 0 20px var(--c1);display:flex;justify-content:center;align-items:center;overflow:hidden;transition:0.3s;}
+#game-box.fullscreen{max-width:100%;height:80vh;border-color:var(--c3);box-shadow:0 0 20px var(--c3);}
+canvas{display:block;width:100%;height:100%;object-fit:fill;}
+#p-grid{display:none;grid-template-columns:repeat(15,1fr);width:100%;max-width:500px;aspect-ratio:1;background:var(--c1);gap:2px;padding:2px;box-shadow:0 0 20px var(--c1);}
+.cell{background:#111;display:flex;justify-content:center;align-items:center;font-size:1.8rem;font-weight:bold;cursor:pointer;aspect-ratio:1;overflow:hidden;line-height:1;}
+.cell.x{color:var(--c2);text-shadow:0 0 15px var(--c2);} .cell.o{color:var(--c1);text-shadow:0 0 15px var(--c1);}
+.overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:none;flex-direction:column;justify-content:center;align-items:center;z-index:10;}
 .overlay.active{display:flex;}
-#score{font-size:2rem;color:var(--pri);margin:15px 0;}
-.controls{display:none;width:100%;max-width:500px;justify-content:space-between;margin-top:10px;}
+#score{font-size:2.5rem;color:var(--c3);margin:15px 0;text-shadow:0 0 15px var(--c3);}
+.controls{display:none;width:100%;max-width:500px;justify-content:space-between;margin-top:15px;}
 @media(pointer:coarse){.controls.active{display:flex;}}
-.m-btn{background:rgba(255,255,255,0.2);border:2px solid #fff;color:#fff;border-radius:50%;width:60px;height:60px;font-size:20px;}
+.m-btn{background:rgba(102,252,241,0.1);border:2px solid var(--c1);color:var(--c1);border-radius:50%;width:60px;height:60px;font-size:24px;text-shadow:0 0 5px var(--c1);}
 .top-bar{width:100%;max-width:500px;display:flex;justify-content:space-between;margin-bottom:10px;}
 </style>
 </head>
 <body>
 
 <div id="home" class="screen active">
-    <h1>Herní Portál</h1>
+    <h1>Neon Games</h1>
     <div class="grid" id="menu"></div>
 </div>
 
 <div id="intro" class="screen">
-    <h1 id="i-title"></h1><p id="i-desc" style="max-width:500px;text-align:center;margin-bottom:15px;"></p>
-    <div style="background:#16213e;padding:15px;border-radius:8px;margin-bottom:15px;width:100%;max-width:500px;">
-        <p>💻 <b>PC:</b> <span id="i-pc"></span></p><p>📱 <b>Mobil:</b> <span id="i-mob"></span></p>
+    <h1 id="i-title"></h1><p id="i-desc" style="max-width:500px;text-align:center;margin-bottom:20px;font-size:1.2rem;"></p>
+    <div style="background:#1f2833;padding:20px;border-radius:10px;margin-bottom:20px;width:100%;max-width:500px;border:1px solid #333;">
+        <p style="margin-bottom:10px;">💻 <b>PC:</b> <span id="i-pc"></span></p>
+        <p>📱 <b>Mobil:</b> <span id="i-mob"></span></p>
     </div>
-    <div><button class="btn" onclick="startG()">HRÁT</button><button class="btn btn-sec" onclick="nav('home')">ZPĚT</button></div>
+    <div style="display:flex;gap:10px;"><button class="btn" onclick="startG()">HRÁT NÁS</button><button class="btn btn-sec" onclick="nav('home')">ZPĚT</button></div>
 </div>
 
 <div id="game" class="screen">
-    <div class="top-bar">
-        <button class="btn btn-sec" style="padding:5px 10px;font-size:0.9rem;" onclick="nav('home')">Zpět</button>
-        <span id="g-stat" style="font-weight:bold;line-height:2;"></span>
-        <button class="btn btn-sec" id="btn-undo" style="display:none;padding:5px 10px;" onclick="undoP()">Zpět tah</button>
+    <div class="top-bar" id="t-bar">
+        <button class="btn btn-sec" style="padding:8px 15px;font-size:1rem;" onclick="nav('home')">Domů</button>
+        <span id="g-stat" style="font-weight:bold;line-height:2.5;font-size:1.2rem;text-shadow:0 0 5px #fff;"></span>
+        <button class="btn" id="btn-undo" style="display:none;padding:8px 15px;font-size:1rem;" onclick="undoP()">Zpět tah</button>
     </div>
     <div id="game-box">
         <canvas id="cvs"></canvas>
         <div id="p-grid"></div>
         <div id="over" class="overlay">
-            <h2 id="e-title">Konec</h2><div id="score"></div>
-            <div><button class="btn" onclick="startG()">ZNOVU</button><button class="btn btn-sec" onclick="nav('home')">DOMŮ</button></div>
+            <h2 id="e-title" style="color:var(--c2);text-shadow:0 0 10px var(--c2);font-size:2rem;">Konec</h2><div id="score"></div>
+            <div style="display:flex;gap:10px;"><button class="btn" onclick="startG()">ZNOVU</button><button class="btn btn-sec" onclick="nav('home')">DOMŮ</button></div>
         </div>
     </div>
     <div id="ctrls" class="controls">
-        <div style="display:flex;gap:10px;"><button class="m-btn" id="bl">◀</button><button class="m-btn" id="br">▶</button></div>
-        <button class="m-btn" id="ba" style="border-color:var(--pri);">A</button>
+        <div style="display:flex;gap:15px;"><button class="m-btn" id="bl">◀</button><button class="m-btn" id="br">▶</button></div>
+        <button class="m-btn" id="ba" style="border-color:var(--c2);color:var(--c2);">A</button>
     </div>
 </div>
 
 <script>
 const G=[
- {id:1,t:'Tetris',i:'🧱',d:'Skládej bloky, padají dolů.',pc:'Šipky: L/P pohyb, Nahoru rotace, Dolů pád',m:'L/P pohyb, A rotace'},
- {id:2,t:'Flappy Bird',i:'🦅',d:'Leť mezi sloupy.',pc:'Mezerník',m:'Tlačítko A'},
- {id:3,t:'Dino Run',i:'🦖',d:'Přeskakuj kaktusy.',pc:'Mezerník',m:'Tlačítko A'},
- {id:4,t:'Kulička',i:'🏓',d:'Odrážej kuličku, bude zrychlovat!',pc:'Šipky L/P',m:'Šipky na displeji'},
+ {id:1,t:'Tetris Neon',i:'🧱',d:'Skládej bloky, padají dolů.',pc:'Šipky: L/P pohyb, Nahoru rotace, Dolů pád',m:'L/P pohyb, A rotace'},
+ {id:2,t:'Flappy Bird',i:'🦅',d:'Skoč a leť mezi sloupy.',pc:'Mezerník',m:'Tlačítko A'},
+ {id:3,t:'Dino Run',i:'🦖',d:'Přeskakuj kaktusy a přežij.',pc:'Mezerník',m:'Tlačítko A'},
+ {id:4,t:'Neon Kulička',i:'🏓',d:'Odrážej kuličku, bude zrychlovat!',pc:'Šipky L/P',m:'Šipky na displeji'},
  {id:5,t:'Piškvorky',i:'❌',d:'5 v řadě (X a O).',pc:'Myš',m:'Klepnutí na pole'},
- {id:6,t:'Fotbal Pong',i:'⚽',d:'Pro 2 hráče. Nepusť míč do brány.',pc:'H1: W/S, H2: Nahoru/Dolů',m:'Polož mobil, šipky pro každého'},
- {id:7,t:'Dáma',i:'♟️',d:'Klasická desková Dáma (žluté kroužky = tahy).',pc:'Myš',m:'Klepnutí'}
+ {id:6,t:'Fotbal Pong',i:'⚽',d:'Pro 2 hráče na celou obrazovku.',pc:'H1: W/S, H2: Nahoru/Dolů',m:'Polož mobil, šipky pro každého'},
+ {id:7,t:'Dáma',i:'♟️',d:'Klasická Dáma. Světle modrá vs Růžová.',pc:'Myš',m:'Klepnutí na displej'}
 ];
 
 let cId=0, loop=0, run=0, gObj=null;
@@ -93,6 +97,8 @@ G.forEach(g=>{
 
 function startG(){
     nav('game'); document.getElementById('over').classList.remove('active');
+    let gb=document.getElementById('game-box');
+    gb.classList.toggle('fullscreen', cId===6); // Fotbal na celou obrazovku
     cvs.style.display=cId===5?'none':'block'; document.getElementById('p-grid').style.display=cId===5?'grid':'none';
     document.getElementById('btn-undo').style.display=cId===5?'block':'none';
     document.getElementById('ctrls').classList.toggle('active', cId!==5&&cId!==7);
@@ -108,7 +114,7 @@ function loopF(){if(!run)return; ctx.clearRect(0,0,400,500); gObj.u(); gObj.d(ct
 
 // --- 1. TETRIS ---
 const SH=[[],[[1,1,1,1]],[[1,1],[1,1]],[[0,1,0],[1,1,1]],[[1,1,0],[0,1,1]],[[0,1,1],[1,1,0]],[[1,0,0],[1,1,1]],[[0,0,1],[1,1,1]]];
-const CLS=['#000','#0ff','#ff0','#a0f','#0f0','#f00','#00f','#f80'];
+const CLS=['#000','#0ff','#f0f','#39ff14','#ff0','#f00','#00f','#f80'];
 class Tetris{
     constructor(){this.b=Array.from({length:20},()=>Array(10).fill(0)); this.sc=0; this.f=0; this.spawn(); this.kd=0;}
     spawn(){let t=Math.floor(Math.random()*7)+1; this.p={m:SH[t], x:3, y:0, c:t}; if(this.col(0,0)) endG("Skóre: "+this.sc);}
@@ -122,7 +128,7 @@ class Tetris{
             this.kd=(k.ArrowLeft||k.ArrowRight||k.ArrowUp||mL||mR||mA);
         }
         if(!k.ArrowLeft&&!k.ArrowRight&&!k.ArrowUp&&!mL&&!mR&&!mA) this.kd=0;
-        if(this.f%(k.ArrowDown?5:30)===0){
+        if(this.f%(k.ArrowDown?4:30)===0){
             if(!this.col(0,1)) this.p.y++; else {
                 for(let r=0;r<this.p.m.length;r++)for(let c=0;c<this.p.m[r].length;c++)if(this.p.m[r][c]) this.b[this.p.y+r][this.p.x+c]=this.p.c;
                 let cL=0; this.b=this.b.filter(r=>{let f=r.every(v=>v); if(f)cL++; return !f;});
@@ -132,25 +138,33 @@ class Tetris{
         } this.f++;
     }
     d(c){
-        c.fillStyle='#111'; c.fillRect(50,0,200,400); // plocha
-        c.strokeStyle='#333'; for(let i=0;i<10;i++)for(let j=0;j<20;j++) c.strokeRect(50+i*20,j*20,20,20);
-        for(let r=0;r<20;r++)for(let cl=0;cl<10;cl++)if(this.b[r][cl]){c.fillStyle=CLS[this.b[r][cl]]; c.fillRect(50+cl*20,r*20,19,19);}
-        c.fillStyle=CLS[this.p.c]; for(let r=0;r<this.p.m.length;r++)for(let cl=0;cl<this.p.m[r].length;cl++)if(this.p.m[r][cl]) c.fillRect(50+(this.p.x+cl)*20,(this.p.y+r)*20,19,19);
+        c.fillStyle='#0b0c10'; c.fillRect(50,0,200,400); // plocha
+        c.strokeStyle='#222'; for(let i=0;i<10;i++)for(let j=0;j<20;j++) c.strokeRect(50+i*20,j*20,20,20);
+        for(let r=0;r<20;r++)for(let cl=0;cl<10;cl++)if(this.b[r][cl]){c.fillStyle=CLS[this.b[r][cl]]; c.shadowBlur=10; c.shadowColor=CLS[this.b[r][cl]]; c.fillRect(50+cl*20,r*20,19,19); c.shadowBlur=0;}
+        c.fillStyle=CLS[this.p.c]; c.shadowBlur=10; c.shadowColor=CLS[this.p.c]; for(let r=0;r<this.p.m.length;r++)for(let cl=0;cl<this.p.m[r].length;cl++)if(this.p.m[r][cl]) c.fillRect(50+(this.p.x+cl)*20,(this.p.y+r)*20,19,19); c.shadowBlur=0;
         c.fillStyle='#fff'; c.font='20px Arial'; c.fillText("Skóre: "+this.sc, 260, 30);
     }
 }
 
 // --- 2. FLAPPY ---
 class Flappy{
-    constructor(){this.y=250;this.v=0;this.p=[];this.s=0;this.f=0;this.j=0;}
+    constructor(){this.y=250;this.v=0;this.p=[];this.s=0;this.f=0;this.started=0;}
     u(){
+        if(!this.started){ if(k.Space||mA){this.started=1; this.v=-7;} return; } // Čeká na start!
         this.v+=0.5; this.y+=this.v;
-        if((k.Space||mA)&&!this.j){this.v=-7;this.j=1;} if(!k.Space&&!mA)this.j=0;
+        if((k.Space||mA)&&this.v>0){this.v=-7;} 
         if(this.f%90===0) this.p.push({x:400,y:Math.random()*200+100});
         this.p.forEach(p=>{ p.x-=3; if(50>p.x&&20<p.x+50&&(this.y<p.y-70||this.y>p.y+70))endG("Skóre: "+this.s); if(p.x===20)this.s++; });
         if(this.y>500||this.y<0) endG("Skóre: "+this.s); this.p=this.p.filter(p=>p.x>-50); this.f++;
     }
-    d(c){c.fillStyle='#87CEEB';c.fillRect(0,0,400,500); c.fillStyle='#2ECC71'; this.p.forEach(p=>{c.fillRect(p.x,0,50,p.y-70);c.fillRect(p.x,p.y+70,50,500);}); c.font='30px Arial';c.fillText('🦅',20,this.y); c.fillStyle='#fff';c.fillText(this.s,10,40);}
+    d(c){
+        c.fillStyle='#0b0c10';c.fillRect(0,0,400,500); 
+        c.fillStyle='#39ff14'; c.shadowBlur=15; c.shadowColor='#39ff14';
+        this.p.forEach(p=>{c.fillRect(p.x,0,50,p.y-70);c.fillRect(p.x,p.y+70,50,500);}); c.shadowBlur=0;
+        c.font='35px Arial';c.fillText('🦅',20,this.y); 
+        c.fillStyle='#fff';c.fillText(this.s,10,40);
+        if(!this.started){c.fillStyle='#66fcf1';c.font='20px Arial';c.fillText('Klikni pro skok!', 120, 200);}
+    }
 }
 
 // --- 3. DINO ---
@@ -159,11 +173,17 @@ class Dino{
     u(){
         this.v+=0.6; this.y+=this.v; if(this.y>350){this.y=350;this.v=0;}
         if((k.Space||mA)&&this.y===350)this.v=-12;
-        if(this.f%(Math.floor(Math.random()*50)+50)===0) this.o.push({x:400,w:20+Math.random()*20,h:30+Math.random()*30});
+        if(this.f%(Math.floor(Math.random()*50)+50)===0) this.o.push({x:400,w:30,h:40});
         this.o.forEach(o=>{ o.x-=this.sp; if(50<o.x+o.w&&80>o.x&&this.y+30>380-o.h)endG("Skóre: "+Math.floor(this.s)); });
         this.o=this.o.filter(o=>o.x>-50); this.s+=0.1; this.sp+=0.002; this.f++;
     }
-    d(c){c.fillStyle='#f4a261';c.fillRect(0,380,400,120); c.font='35px Arial';c.fillText('🦖',40,this.y+30); c.fillStyle='#2a9d8f'; this.o.forEach(o=>c.fillRect(o.x,380-o.h,o.w,o.h)); c.fillStyle='#fff';c.fillText(Math.floor(this.s),10,40);}
+    d(c){
+        c.fillStyle='#1f2833';c.fillRect(0,380,400,120); 
+        c.fillStyle='#66fcf1'; c.shadowBlur=10; c.shadowColor='#66fcf1'; c.fillRect(0,380,400,3); c.shadowBlur=0; // Neon linka
+        c.font='40px Arial';c.fillText('🦖',40,this.y+35); 
+        this.o.forEach(o=>{ c.font='35px Arial'; c.fillText('🌵', o.x, 380); }); // Kaktusy!
+        c.fillStyle='#fff';c.fillText(Math.floor(this.s),10,40);
+    }
 }
 
 // --- 4. KULIČKA ---
@@ -177,13 +197,20 @@ class Pong{
         if(this.by>470&&this.by<480&&this.bx>this.px&&this.bx<this.px+100){this.vy=-Math.abs(this.vy)*1.05; this.vx*=1.05; this.by=470; this.s++;}
         if(this.by>500)endG("Skóre: "+this.s);
     }
-    d(c){c.fillStyle='#fff'; c.fillRect(this.px,480,100,10); c.beginPath();c.arc(this.bx,this.by,8,0,7);c.fill(); c.font='30px Arial';c.fillText(this.s,10,40);}
+    d(c){
+        c.fillStyle='#0b0c10'; c.fillRect(0,0,400,500);
+        c.fillStyle='#ff00ff'; c.shadowBlur=15; c.shadowColor='#ff00ff'; c.fillRect(this.px,480,100,10); 
+        c.fillStyle='#66fcf1'; c.shadowColor='#66fcf1'; c.beginPath();c.arc(this.bx,this.by,8,0,7);c.fill(); c.shadowBlur=0;
+        c.font='30px Arial';c.fillStyle='#fff';c.fillText(this.s,10,40);
+    }
 }
 
 // --- 6. FOTBAL PONG ---
 class P2{
-    constructor(){this.y1=200;this.y2=200;this.bx=200;this.by=250;this.vx=4;this.vy=4;this.s1=0;this.s2=0;}
+    constructor(){this.s1=0;this.s2=0;this.r();}
+    r(){this.y1=200;this.y2=200;this.bx=200;this.by=250;this.vx=(Math.random()>0.5?2:-2);this.vy=2;this.w=60;} // w = wait (čekání 1 vteřinu)
     u(){
+        if(this.w>0){this.w--; return;} // Zpoždění startu kola
         if(k.KeyW||mL)this.y1-=5; if(k.KeyS||mA)this.y1+=5; // mA na S
         if(k.ArrowUp||k.Space)this.y2-=5; if(k.ArrowDown||mR)this.y2+=5;
         this.y1=Math.max(0,Math.min(420,this.y1)); this.y2=Math.max(0,Math.min(420,this.y2));
@@ -192,71 +219,77 @@ class P2{
         if(this.bx<20&&this.by>this.y1&&this.by<this.y1+80){this.vx=Math.abs(this.vx)*1.05;this.bx=20;}
         if(this.bx>380&&this.by>this.y2&&this.by<this.y2+80){this.vx=-Math.abs(this.vx)*1.05;this.bx=380;}
         if(this.bx<0){this.s2++;this.r();} if(this.bx>400){this.s1++;this.r();}
-        if(this.s1>4)endG(this.s1+"-"+this.s2,"Modrá Vyhrála"); if(this.s2>4)endG(this.s1+"-"+this.s2,"Červená Vyhrála");
+        if(this.s1>4)endG(this.s1+"-"+this.s2,"Modrá Vyhrála"); if(this.s2>4)endG(this.s1+"-"+this.s2,"Růžová Vyhrála");
     }
-    r(){this.bx=200;this.by=250;this.vx=Math.random()>0.5?4:-4;this.vy=4;}
-    d(c){c.fillStyle='#3498db';c.fillRect(10,this.y1,10,80); c.fillStyle='#e74c3c';c.fillRect(380,this.y2,10,80); c.fillStyle='#fff';c.beginPath();c.arc(this.bx,this.by,8,0,7);c.fill(); c.font='30px Arial';c.fillText(this.s1+" - "+this.s2,165,40);}
+    d(c){
+        c.fillStyle='#0b0c10'; c.fillRect(0,0,400,500);
+        c.fillStyle='#66fcf1'; c.shadowBlur=15; c.shadowColor='#66fcf1'; c.fillRect(10,this.y1,10,80); // P1
+        c.fillStyle='#ff00ff'; c.shadowColor='#ff00ff'; c.fillRect(380,this.y2,10,80); // P2
+        c.fillStyle='#39ff14'; c.shadowColor='#39ff14'; c.beginPath();c.arc(this.bx,this.by,8,0,7);c.fill(); c.shadowBlur=0;
+        c.font='30px Arial';c.fillStyle='#fff';c.fillText(this.s1+" - "+this.s2,165,40);
+        if(this.w>0){c.fillStyle='#fff'; c.fillText("Připravit...", 130, 200);}
+    }
 }
 
 // --- 7. DÁMA ---
 class Checkers{
     constructor(){
-        this.b=[]; this.t=1; this.sP=null; this.vM=[];
-        for(let r=0;r<8;r++){this.b[r]=[];for(let c=0;c<8;c++){
-            if((r+c)%2!==0){if(r<3)this.b[r][c]={p:2,k:0}; else if(r>4)this.b[r][c]={p:1,k:0}; else this.b[r][c]=null;} else this.b[r][c]=null;
-        }}
-        cvs.onmousedown=e=>this.clk(e.offsetX,e.offsetY);
-        cvs.ontouchstart=e=>{let r=cvs.getBoundingClientRect(); this.clk(e.touches[0].clientX-r.left, e.touches[0].clientY-r.top);};
+        // 1 = Modrý (Dole), 2 = Růžový (Nahoře)
+        this.b=Array(8).fill(0).map((_,r)=>Array(8).fill(0).map((_,c)=>(r+c)%2?r<3?2:r>4?1:0:0));
+        this.t=1; this.s=null; // t = tah, s = select
+        document.getElementById('g-stat').innerText="Hraje: Modrá";
+        document.getElementById('g-stat').style.color="var(--c1)";
+        cvs.onmousedown=e=>this.c(e.offsetX,e.offsetY);
+        cvs.ontouchstart=e=>{let r=cvs.getBoundingClientRect();this.c(e.touches[0].clientX-r.left,e.touches[0].clientY-r.top);};
     }
-    clk(x,y){
-        let c=Math.floor(x/(400/8)), r=Math.floor(y/(500/8));
-        if(r>7||r<0||c>7||c<0)return;
-        let mv=this.vM.find(m=>m.r===r&&m.c===c);
-        if(mv){ // Tah
-            this.b[r][c]=this.b[this.sP.r][this.sP.c]; this.b[this.sP.r][this.sP.c]=null;
-            if(mv.cp) this.b[mv.cp.r][mv.cp.c]=null; // Skok
-            if(r===0&&this.b[r][c].p===1) this.b[r][c].k=1; // Dáma bílá
-            if(r===7&&this.b[r][c].p===2) this.b[r][c].k=1; // Dáma černá
-            this.t=this.t===1?2:1; this.sP=null; this.vM=[];
-            document.getElementById('g-stat').innerText=this.t===1?"Bílý":"Černý";
-        } else if(this.b[r][c]&&this.b[r][c].p===this.t){
-            this.sP={r,c}; this.vM=[];
-            let d=[]; let pc=this.b[r][c];
-            if(pc.p===1||pc.k) d.push([-1,-1],[-1,1]);
-            if(pc.p===2||pc.k) d.push([1,-1],[1,1]);
-            d.forEach(v=>{
-                let nr=r+v[0], nc=c+v[1];
-                if(nr>=0&&nr<8&&nc>=0&&nc<8){
-                    if(!this.b[nr][nc]) this.vM.push({r:nr,c:nc});
-                    else if(this.b[nr][nc].p!==pc.p){
-                        let jr=nr+v[0], jc=nc+v[1];
-                        if(jr>=0&&jr<8&&jc>=0&&jc<8&&!this.b[jr][jc]) this.vM.push({r:jr,c:jc,cp:{r:nr,c:nc}});
+    c(x,y){
+        let w=cvs.clientWidth/8, h=cvs.clientHeight/8;
+        let c=Math.floor(x/w), r=Math.floor(y/h);
+        if(r<0||r>7||c<0||c>7)return;
+        
+        if(this.s){
+            let sr=this.s.r, sc=this.s.c, p=this.b[sr][sc];
+            if(this.b[r][c]===0 && (r+c)%2!==0){ // Klik na prázdné černé políčko
+                let dr=r-sr, dc=c-sc, dir=p===1?-1:1; // 1 jde nahoru (-1), 2 jde dolů (+1)
+                
+                // Obyčejný krok šikmo
+                if(Math.abs(dc)===1 && dr===dir){
+                    this.b[r][c]=p; this.b[sr][sc]=0; this.t=3-this.t;
+                } 
+                // Skok přes soupeře
+                else if(Math.abs(dc)===2 && dr===dir*2){
+                    let mr=sr+dr/2, mc=sc+dc/2; // Políčko uprostřed skoku
+                    if(this.b[mr][mc] && this.b[mr][mc]!==p){ // Je tam soupeř
+                        this.b[r][c]=p; this.b[sr][sc]=0; this.b[mr][mc]=0; this.t=3-this.t; // Snědeno
                     }
                 }
-            });
-        } else {this.sP=null;this.vM=[];}
+                document.getElementById('g-stat').innerText=this.t===1?"Hraje: Modrá":"Hraje: Růžová";
+                document.getElementById('g-stat').style.color=this.t===1?"var(--c1)":"var(--c2)";
+            }
+            this.s=null; // Zruší označení
+        } else if(this.b[r][c]===this.t) {
+            this.s={r,c}; // Označí vlastní figurku
+        }
     }
     u(){}
-    d(c){
+    d(ctx){
         let w=400/8, h=500/8;
-        for(let r=0;r<8;r++)for(let cl=0;cl<8;cl++){
-            c.fillStyle=(r+cl)%2===0?'#eee':'#555'; c.fillRect(cl*w,r*h,w,h);
-            let pc=this.b[r][cl];
-            if(pc){
-                c.fillStyle=pc.p===1?'#fff':'#222'; c.beginPath(); c.arc(cl*w+w/2,r*h+h/2,w/2-5,0,7); c.fill();
-                c.strokeStyle=pc.p===1?'#ccc':'#000'; c.lineWidth=3; c.stroke();
-                if(pc.k){c.fillStyle='gold';c.beginPath();c.arc(cl*w+w/2,r*h+h/2,10,0,7);c.fill();}
+        for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+            ctx.fillStyle=(r+c)%2?'#111':'#eee'; ctx.fillRect(c*w,r*h,w,h);
+            let p=this.b[r][c];
+            if(p){
+                ctx.fillStyle=p===1?'#66fcf1':'#ff00ff'; ctx.shadowBlur=10; ctx.shadowColor=ctx.fillStyle;
+                ctx.beginPath(); ctx.arc(c*w+w/2,r*h+h/2,w/2-5,0,7); ctx.fill(); ctx.shadowBlur=0;
             }
         }
-        if(this.sP){c.strokeStyle='yellow';c.lineWidth=3;c.strokeRect(this.sP.c*w,this.sP.r*h,w,h);}
-        this.vM.forEach(m=>{c.strokeStyle='yellow';c.beginPath();c.arc(m.c*w+w/2,m.r*h+h/2,10,0,7);c.stroke();});
+        if(this.s){ctx.strokeStyle='#39ff14';ctx.lineWidth=4;ctx.shadowBlur=15;ctx.shadowColor='#39ff14';ctx.strokeRect(this.s.c*w,this.s.r*h,w,h);ctx.shadowBlur=0;}
     }
 }
 
 // --- 5. PIŠKVORKY (DOM) ---
 let pB=[], pH=[], pT='x';
 function initPisk(){
-    const d=document.getElementById('p-grid'); d.innerHTML=''; pB=[]; pH=[]; pT='x'; document.getElementById('g-stat').innerText='Na tahu: X';
+    const d=document.getElementById('p-grid'); d.innerHTML=''; pB=[]; pH=[]; pT='x'; document.getElementById('g-stat').innerText='Na tahu: X'; document.getElementById('g-stat').style.color="var(--c2)";
     for(let r=0;r<15;r++){pB[r]=[]; for(let c=0;c<15;c++){
         pB[r][c]=0; let e=document.createElement('div'); e.className='cell'; e.id=`c${r}-${c}`;
         e.onclick=()=>pClk(r,c); d.appendChild(e);
@@ -266,9 +299,9 @@ function pClk(r,c){
     if(pB[r][c]||!run)return; pB[r][c]=pT; pH.push({r,c,t:pT});
     let e=document.getElementById(`c${r}-${c}`); e.innerText=pT.toUpperCase(); e.classList.add(pT);
     if(chkW(r,c,pT)){endG(pT.toUpperCase()+" vyhrál!");return;}
-    pT=pT==='x'?'o':'x'; document.getElementById('g-stat').innerText='Na tahu: '+pT.toUpperCase();
+    pT=pT==='x'?'o':'x'; document.getElementById('g-stat').innerText='Na tahu: '+pT.toUpperCase(); document.getElementById('g-stat').style.color=pT==='x'?"var(--c2)":"var(--c1)";
 }
-function undoP(){if(!pH.length||!run)return; let l=pH.pop(); pB[l.r][l.c]=0; let e=document.getElementById(`c${l.r}-${l.c}`); e.innerText=''; e.classList.remove('x','o'); pT=l.t; document.getElementById('g-stat').innerText='Na tahu: '+pT.toUpperCase();}
+function undoP(){if(!pH.length||!run)return; let l=pH.pop(); pB[l.r][l.c]=0; let e=document.getElementById(`c${l.r}-${l.c}`); e.innerText=''; e.classList.remove('x','o'); pT=l.t; document.getElementById('g-stat').innerText='Na tahu: '+pT.toUpperCase(); document.getElementById('g-stat').style.color=pT==='x'?"var(--c2)":"var(--c1)";}
 function chkW(r,c,p){
     const D=[[0,1],[1,0],[1,1],[1,-1]];
     for(let[dr,dc]of D){
