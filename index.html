@@ -28,7 +28,6 @@ h1{margin-bottom:15px;color:var(--c1);text-transform:uppercase;text-shadow:0 0 1
 #game-box{position:relative;width:100%;max-width:500px;flex:1;min-height:0;background:#000;border:2px solid var(--c1);border-radius:10px;box-shadow:0 0 20px var(--c1);display:flex;justify-content:center;align-items:center;overflow:hidden;margin-bottom:10px;}
 canvas{display:block;max-width:100%;max-height:100%;aspect-ratio:4/5;object-fit:contain;}
 
-/* Piškvorky - vráceno kompletně do původní podoby z prvního promptu */
 #p-grid{display:none;grid-template-columns:repeat(15,1fr);width:100%;max-width:500px;max-height:100%;aspect-ratio:1;background:var(--c1);gap:2px;padding:2px;box-shadow:0 0 20px var(--c1);}
 .cell{background:#111;display:flex;justify-content:center;align-items:center;font-size:1.8rem;font-weight:bold;cursor:pointer;aspect-ratio:1;overflow:hidden;line-height:1;}
 .cell.x{color:var(--c2);text-shadow:0 0 15px var(--c2);} .cell.o{color:var(--c1);text-shadow:0 0 15px var(--c1);}
@@ -310,7 +309,7 @@ class Pong{
     }
 }
 
-// --- 6. FOTBAL PONG (Dynamický přepínač PC vs Mobil) ---
+// --- 6. FOTBAL PONG (Dynamický přepínač PC vs Mobil s OPRAVENÝM POHYBEM HRAČE 2) ---
 class P2{
     constructor(){
         this.isMob = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
@@ -330,9 +329,12 @@ class P2{
         if(this.w>0){this.w--; return;}
         
         if(this.isMob){
-            // Vertikální (striktně oddělená tlačítka, na mobilu nereagujeme na klávesnici)
+            // Modrý dole:
             if(mL)this.x1-=5; if(mR)this.x1+=5; 
-            if(m2L)this.x2-=5; if(m2R)this.x2+=5;
+            
+            // Červený nahoře - PROHOZENO! Aby šipky dávaly smysl pro hráče co sedí naproti.
+            if(m2L)this.x2+=5; if(m2R)this.x2-=5;
+            
             this.x1=Math.max(0,Math.min(320,this.x1)); this.x2=Math.max(0,Math.min(320,this.x2));
             
             this.bx+=this.vx; this.by+=this.vy;
