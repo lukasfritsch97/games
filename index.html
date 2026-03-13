@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Herní Portál Fridžos</title>
+<title>Profi Herní Portál</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
 
@@ -46,9 +46,15 @@ canvas { display:block; max-width:100%; max-height:100%; aspect-ratio:4/5; objec
 .cell:hover { background: #1e293b; }
 .cell.x { color: var(--c2); text-shadow: 0 0 10px var(--c2); } .cell.o { color: var(--c1); text-shadow: 0 0 10px var(--c1); }
 
-/* STYLY PRO MINY */
-#m-grid { display:none; position:relative; grid-template-columns:repeat(9, 1fr); width:100%; max-width:500px; aspect-ratio:1; background: #64748b; gap:2px; padding:2px; box-shadow: 0 0 20px rgba(56,189,248,0.3); border-radius: 10px; }
-.m-cell { background: #94a3b8; display:flex; justify-content:center; align-items:center; font-weight:800; cursor:pointer; font-size: 1.2rem; user-select:none; border-top: 2px solid #cbd5e1; border-left: 2px solid #cbd5e1; border-bottom: 2px solid #475569; border-right: 2px solid #475569; border-radius:2px; }
+/* STYLY PRO MINY - fixnuté roztahování */
+#m-grid { display:none; position:relative; grid-template-columns:repeat(9, 1fr); width:100%; max-width:500px; max-height:100%; aspect-ratio:1; background: #64748b; gap:2px; padding:2px; box-shadow: 0 0 20px rgba(56,189,248,0.3); border-radius: 10px; }
+.m-cell { 
+    background: #94a3b8; display:flex; justify-content:center; align-items:center; 
+    font-weight:800; cursor:pointer; font-size: 1.2rem; user-select:none; 
+    border-top: 2px solid #cbd5e1; border-left: 2px solid #cbd5e1; 
+    border-bottom: 2px solid #475569; border-right: 2px solid #475569; border-radius:2px; 
+    aspect-ratio: 1; overflow: hidden; line-height: 1; box-sizing: border-box; 
+}
 .m-cell:active { border: 2px solid #64748b; background: #cbd5e1; }
 .m-cell.rev { background: #cbd5e1; border: 1px solid #94a3b8; box-shadow: inset 0 0 5px rgba(0,0,0,0.1); cursor: default; }
 .m-1 { color: #2563eb; } .m-2 { color: #16a34a; } .m-3 { color: #dc2626; } .m-4 { color: #7e22ce; }
@@ -128,7 +134,8 @@ canvas { display:block; max-width:100%; max-height:100%; aspect-ratio:4/5; objec
     <div id="game-box">
         <canvas id="cvs"></canvas>
         <div id="p-grid"></div>
-        <div id="m-grid"></div> <div id="over" class="overlay">
+        <div id="m-grid"></div>
+        <div id="over" class="overlay">
             <h2 id="e-title" style="color:var(--c2); font-size:2.5rem; font-weight:800; margin-bottom:10px;">Konec</h2>
             <div id="score"></div>
             <div id="new-hs" style="color:#fbbf24; display:none; margin-bottom:20px; font-weight:600; background:rgba(251,191,36,0.1); padding:5px 15px; border-radius:20px;">🎉 Nové nejlepší skóre! 🎉</div>
@@ -162,13 +169,14 @@ const G=[
  {id:5,t:'Piškvorky',i:'❌',d:'Klasické nebo 3x3 (vyberte před startem).',pc:'Myš',m:'Klepnutí na pole'},
  {id:6,t:'Fotbal Pong',i:'⚽',d:'Pro 2 hráče. Sedněte si proti sobě!',pc:'H1: W/S, H2: Nahoru/Dolů',m:'Polož mobil, každý má svoje šipky'},
  {id:7,t:'Dáma',i:'♟️',d:'Kompletní česká pravidla s dámou!',pc:'Myš',m:'Vyber figurku a ťukni kam s ní'},
- {id:8,t:'Hledání min',i:'💣',d:'Klasické hledání min. Bacha na ně!',pc:'Levé tl.: odkrýt, Pravé tl.: vlajka',m:'Tlačítko v liště pro přepnutí ⛏️/🚩, pak ťuknout'}
+ {id:8,t:'Hledání min',i:'💣',d:'Klasické hledání min.',pc:'Levé tl.: odkrýt, Pravé tl.: vlajka',m:'Tlačítko v liště pro přepnutí ⛏️/🚩, pak ťuknout'}
 ];
 
 let cId=0, loop=0, run=0, isPaused=0, gObj=null;
 const cvs=document.getElementById('cvs'), ctx=cvs.getContext('2d');
 cvs.width=400; cvs.height=500;
 let k={}; 
+// ZAKÁZÁNÍ MEZERNÍKU PRO KLIKÁNÍ NA TLAČÍTKA
 window.onkeydown=e=>{ if(e.code==='Space') e.preventDefault(); k[e.code]=1; }; 
 window.onkeyup=e=>k[e.code]=0;
 
@@ -406,7 +414,6 @@ function mPlace(er, ec){
     let placed=0;
     while(placed < mMines){
         let r=Math.floor(Math.random()*mSize), c=Math.floor(Math.random()*mSize);
-        // První kliknutí nesmí být mina
         if(mBoard[r][c] !== 'M' && (r !== er || c !== ec)){
             mBoard[r][c] = 'M'; placed++;
         }
@@ -432,7 +439,6 @@ function mClick(r,c){
         document.getElementById(`m${r}-${c}`).style.background='#ef4444';
         document.getElementById(`m${r}-${c}`).style.borderColor='#ef4444';
         
-        // Odhalení zbylých min
         for(let i=0;i<mSize;i++)for(let j=0;j<mSize;j++){
             if(mBoard[i][j]==='M' && !mFlag[i][j] && (i!==r||j!==c)){
                 let el = document.getElementById(`m${i}-${j}`);
