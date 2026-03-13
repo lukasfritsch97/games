@@ -28,7 +28,8 @@ h1{margin-bottom:15px;color:var(--c1);text-transform:uppercase;text-shadow:0 0 1
 #game-box{position:relative;width:100%;max-width:500px;flex:1;min-height:0;background:#000;border:2px solid var(--c1);border-radius:10px;box-shadow:0 0 20px var(--c1);display:flex;justify-content:center;align-items:center;overflow:hidden;margin-bottom:10px;}
 canvas{display:block;max-width:100%;max-height:100%;aspect-ratio:4/5;object-fit:contain;}
 
-#p-grid{display:none;grid-template-columns:repeat(15,1fr);width:100%;max-width:500px;max-height:100%;aspect-ratio:1;background:var(--c1);gap:2px;padding:2px;box-shadow:0 0 20px var(--c1);}
+/* PŘIDÁN position:relative PRO KOREKTNÍ UMÍSTĚNÍ ŠKRTACÍ ČÁRY */
+#p-grid{display:none;position:relative;grid-template-columns:repeat(15,1fr);width:100%;max-width:500px;max-height:100%;aspect-ratio:1;background:var(--c1);gap:2px;padding:2px;box-shadow:0 0 20px var(--c1);}
 .cell{background:#111;display:flex;justify-content:center;align-items:center;font-size:1.8rem;font-weight:bold;cursor:pointer;aspect-ratio:1;overflow:hidden;line-height:1;}
 .cell.x{color:var(--c2);text-shadow:0 0 15px var(--c2);} .cell.o{color:var(--c1);text-shadow:0 0 15px var(--c1);}
 
@@ -55,6 +56,13 @@ canvas{display:block;max-width:100%;max-height:100%;aspect-ratio:4/5;object-fit:
     <h1 id="i-title"></h1>
     <div id="hs-disp">Nejlepší skóre: <span id="hs-val">0</span></div>
     <p id="i-desc" style="max-width:500px;text-align:center;margin-bottom:20px;font-size:1.1rem;"></p>
+    
+    <div id="pisk-settings" style="display:none; margin-bottom:20px; background:rgba(31,40,51,0.8); backdrop-filter:blur(5px); padding:20px; border-radius:10px; border:1px solid var(--c2); width:100%; max-width:500px; text-align:center;">
+        <p style="margin-bottom:10px; color:var(--c1); font-weight:bold;">Vyber velikost hracího pole:</p>
+        <label style="margin-right:15px; cursor:pointer;"><input type="radio" name="pMode" value="15" checked> Klasika (15x15, 5 v řadě)</label>
+        <label style="cursor:pointer;"><input type="radio" name="pMode" value="3"> Rychlovka (3x3, 3 v řadě)</label>
+    </div>
+
     <div style="background:rgba(31,40,51,0.8);backdrop-filter:blur(5px);padding:20px;border-radius:10px;margin-bottom:20px;width:100%;max-width:500px;border:1px solid #333;">
         <p style="margin-bottom:10px;">💻 <b>PC:</b> <span id="i-pc"></span></p>
         <p>📱 <b>Mobil:</b> <span id="i-mob"></span></p>
@@ -108,7 +116,7 @@ const G=[
  {id:2,t:'Flappy Bird',i:'🦅',d:'Skoč a leť mezi sloupy.',pc:'Mezerník',m:'Tlačítko A'},
  {id:3,t:'Dino Run',i:'🦖',d:'Přeskakuj kaktusy a přežij.',pc:'Mezerník',m:'Tlačítko A'},
  {id:4,t:'Kulička',i:'🏓',d:'Odrážej kuličku, bude zrychlovat!',pc:'Šipky L/P',m:'Šipky na okrajích displeje'},
- {id:5,t:'Piškvorky',i:'❌',d:'5 v řadě (X a O).',pc:'Myš',m:'Klepnutí na pole'},
+ {id:5,t:'Piškvorky',i:'❌',d:'Klasické nebo 3x3 (vyberte před startem).',pc:'Myš',m:'Klepnutí na pole'},
  {id:6,t:'Fotbal Pong',i:'⚽',d:'Pro 2 hráče. Sedněte si proti sobě!',pc:'H1: W/S, H2: Nahoru/Dolů',m:'Polož mobil, každý má svoje šipky'},
  {id:7,t:'Dáma',i:'♟️',d:'Kompletní česká pravidla s dámou!',pc:'Myš',m:'Vyber figurku a ťukni kam s ní'}
 ];
@@ -141,6 +149,10 @@ G.forEach(g=>{
         cId=g.id; document.getElementById('i-title').innerText=g.t; document.getElementById('i-desc').innerText=g.d; document.getElementById('i-pc').innerText=g.pc; document.getElementById('i-mob').innerText=g.m; 
         let hd=document.getElementById('hs-disp');
         if(cId<=4){hd.style.display='block'; document.getElementById('hs-val').innerText=getHS(cId);} else hd.style.display='none';
+        
+        let ps=document.getElementById('pisk-settings');
+        if(ps) ps.style.display=(cId===5)?'block':'none';
+
         nav('intro');
     };
     document.getElementById('menu').appendChild(d);
@@ -160,7 +172,6 @@ function startG(){
     let p2c=document.getElementById('p2-ctrls'), tBar=document.getElementById('t-bar');
     let pongHome=document.getElementById('pong-home'), pongRestart=document.getElementById('pong-restart');
     
-    // Výchozí nastavení tlačítek
     bl.style.display='flex'; br.style.display='flex'; ba.style.display='flex'; bd.style.display='none';
     lGrp.style.width='auto'; lGrp.style.justifyContent='flex-start'; rGrp.style.display='flex';
     ba.innerText='A'; p2c.style.display='none'; tBar.style.display='flex';
@@ -309,7 +320,7 @@ class Pong{
     }
 }
 
-// --- 6. FOTBAL PONG (Dynamický přepínač PC vs Mobil s OPRAVENÝM POHYBEM HRAČE 2) ---
+// --- 6. FOTBAL PONG ---
 class P2{
     constructor(){
         this.isMob = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
@@ -329,10 +340,7 @@ class P2{
         if(this.w>0){this.w--; return;}
         
         if(this.isMob){
-            // Modrý dole:
             if(mL)this.x1-=5; if(mR)this.x1+=5; 
-            
-            // Červený nahoře - PROHOZENO! Aby šipky dávaly smysl pro hráče co sedí naproti.
             if(m2L)this.x2+=5; if(m2R)this.x2-=5;
             
             this.x1=Math.max(0,Math.min(320,this.x1)); this.x2=Math.max(0,Math.min(320,this.x2));
@@ -348,7 +356,6 @@ class P2{
             }
             if(this.by<0){this.s1++;this.r();} if(this.by>500){this.s2++;this.r();}
         } else {
-            // Horizontální pro PC (W/S a Šipky Nahoru/Dolů)
             if(k.KeyW)this.y1-=5; if(k.KeyS)this.y1+=5; 
             if(k.ArrowUp)this.y2-=5; if(k.ArrowDown)this.y2+=5;
             this.y1=Math.max(0,Math.min(420,this.y1)); this.y2=Math.max(0,Math.min(420,this.y2));
@@ -530,30 +537,94 @@ class Checkers{
     }
 }
 
-// --- 5. PIŠKVORKY ---
-let pB=[], pH=[], pT='x';
+// --- 5. PIŠKVORKY (UPRAVENÉ) ---
+let pB=[], pH=[], pT='x', pSize=15, pWin=5;
+
 function initPisk(){
-    const d=document.getElementById('p-grid'); d.innerHTML=''; pB=[]; pH=[]; pT='x'; document.getElementById('g-stat').innerText='Na tahu: X'; document.getElementById('g-stat').style.color="var(--c2)";
-    for(let r=0;r<15;r++){pB[r]=[]; for(let c=0;c<15;c++){
-        pB[r][c]=0; let e=document.createElement('div'); e.className='cell'; e.id=`c${r}-${c}`;
-        e.onclick=()=>pClk(r,c); d.appendChild(e);
-    }}
+    let modeEl = document.querySelector('input[name="pMode"]:checked');
+    pSize = (modeEl && modeEl.value === '3') ? 3 : 15;
+    pWin = pSize === 3 ? 3 : 5;
+    
+    const d=document.getElementById('p-grid'); 
+    d.innerHTML='<svg id="p-svg" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:5;"></svg>'; 
+    d.style.gridTemplateColumns = `repeat(${pSize}, 1fr)`;
+    pB=[]; pH=[]; pT='x'; 
+    document.getElementById('g-stat').innerText='Na tahu: X'; 
+    document.getElementById('g-stat').style.color="var(--c2)";
+    
+    for(let r=0;r<pSize;r++){
+        pB[r]=[]; 
+        for(let c=0;c<pSize;c++){
+            pB[r][c]=0; 
+            let e=document.createElement('div'); 
+            e.className='cell'; 
+            e.id=`c${r}-${c}`;
+            if(pSize === 3) e.style.fontSize = '5rem';
+            e.onclick=()=>pClk(r,c); 
+            d.appendChild(e);
+        }
+    }
 }
+
 function pClk(r,c){
-    if(pB[r][c]||!run)return; pB[r][c]=pT; pH.push({r,c,t:pT});
-    let e=document.getElementById(`c${r}-${c}`); e.innerText=pT.toUpperCase(); e.classList.add(pT);
-    if(chkW(r,c,pT)){endG(pT.toUpperCase()+" vyhrál!","Konec", false);return;}
-    pT=pT==='x'?'o':'x'; document.getElementById('g-stat').innerText='Na tahu: '+pT.toUpperCase(); document.getElementById('g-stat').style.color=pT==='x'?"var(--c2)":"var(--c1)";
+    if(pB[r][c]||!run)return; 
+    pB[r][c]=pT; pH.push({r,c,t:pT});
+    let e=document.getElementById(`c${r}-${c}`); 
+    e.innerText=pT.toUpperCase(); 
+    e.classList.add(pT);
+    
+    let winLine = chkW(r,c,pT);
+    if(winLine){
+        let svg = document.getElementById('p-svg');
+        let w = 100/pSize;
+        let x1 = (winLine[0].c + 0.5) * w;
+        let y1 = (winLine[0].r + 0.5) * w;
+        let x2 = (winLine[winLine.length-1].c + 0.5) * w;
+        let y2 = (winLine[winLine.length-1].r + 0.5) * w;
+        
+        if(svg) svg.innerHTML = `<line x1="${x1}%" y1="${y1}%" x2="${x2}%" y2="${y2}%" stroke="white" stroke-width="${pSize===3?15:6}" stroke-linecap="round" filter="drop-shadow(0 0 5px white)" />`;
+        
+        endG(pT.toUpperCase()+" vyhrál!","Konec", false);
+        return;
+    }
+    
+    if(pH.length === pSize*pSize){
+        endG("Remíza!","Konec", false); 
+        return;
+    }
+
+    pT=pT==='x'?'o':'x'; 
+    document.getElementById('g-stat').innerText='Na tahu: '+pT.toUpperCase(); 
+    document.getElementById('g-stat').style.color=pT==='x'?"var(--c2)":"var(--c1)";
 }
-function undoP(){if(!pH.length||!run)return; let l=pH.pop(); pB[l.r][l.c]=0; let e=document.getElementById(`c${l.r}-${l.c}`); e.innerText=''; e.classList.remove('x','o'); pT=l.t; document.getElementById('g-stat').innerText='Na tahu: '+pT.toUpperCase(); document.getElementById('g-stat').style.color=pT==='x'?"var(--c2)":"var(--c1)";}
+
+function undoP(){
+    if(!pH.length||!run)return; 
+    let l=pH.pop(); pB[l.r][l.c]=0; 
+    let e=document.getElementById(`c${l.r}-${l.c}`); 
+    e.innerText=''; e.classList.remove('x','o'); 
+    pT=l.t; 
+    document.getElementById('g-stat').innerText='Na tahu: '+pT.toUpperCase(); 
+    document.getElementById('g-stat').style.color=pT==='x'?"var(--c2)":"var(--c1)";
+}
+
 function chkW(r,c,p){
     const D=[[0,1],[1,0],[1,1],[1,-1]];
     for(let[dr,dc]of D){
-        let k=1;
-        for(let i=1;i<5;i++){let nr=r+dr*i,nc=c+dc*i; if(nr>=0&&nr<15&&nc>=0&&nc<15&&pB[nr][nc]===p)k++; else break;}
-        for(let i=1;i<5;i++){let nr=r-dr*i,nc=c-dc*i; if(nr>=0&&nr<15&&nc>=0&&nc<15&&pB[nr][nc]===p)k++; else break;}
-        if(k>=5)return 1;
-    } return 0;
+        let wL=[{r,c}];
+        for(let i=1;i<pWin;i++){
+            let nr=r+dr*i,nc=c+dc*i; 
+            if(nr>=0&&nr<pSize&&nc>=0&&nc<pSize&&pB[nr][nc]===p) wL.push({r:nr,c:nc}); 
+            else break;
+        }
+        for(let i=1;i<pWin;i++){
+            let nr=r-dr*i,nc=c-dc*i; 
+            if(nr>=0&&nr<pSize&&nc>=0&&nc<pSize&&pB[nr][nc]===p) wL.unshift({r:nr,c:nc}); 
+            else break;
+        }
+        if(wL.length>=pWin) return wL;
+    } 
+    return null;
 }
 </script>
 </body>
