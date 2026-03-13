@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Profi Herní Portál</title>
+<title>Herní Portál Fridžos</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
 
@@ -46,6 +46,14 @@ canvas { display:block; max-width:100%; max-height:100%; aspect-ratio:4/5; objec
 .cell:hover { background: #1e293b; }
 .cell.x { color: var(--c2); text-shadow: 0 0 10px var(--c2); } .cell.o { color: var(--c1); text-shadow: 0 0 10px var(--c1); }
 
+/* STYLY PRO MINY */
+#m-grid { display:none; position:relative; grid-template-columns:repeat(9, 1fr); width:100%; max-width:500px; aspect-ratio:1; background: #64748b; gap:2px; padding:2px; box-shadow: 0 0 20px rgba(56,189,248,0.3); border-radius: 10px; }
+.m-cell { background: #94a3b8; display:flex; justify-content:center; align-items:center; font-weight:800; cursor:pointer; font-size: 1.2rem; user-select:none; border-top: 2px solid #cbd5e1; border-left: 2px solid #cbd5e1; border-bottom: 2px solid #475569; border-right: 2px solid #475569; border-radius:2px; }
+.m-cell:active { border: 2px solid #64748b; background: #cbd5e1; }
+.m-cell.rev { background: #cbd5e1; border: 1px solid #94a3b8; box-shadow: inset 0 0 5px rgba(0,0,0,0.1); cursor: default; }
+.m-1 { color: #2563eb; } .m-2 { color: #16a34a; } .m-3 { color: #dc2626; } .m-4 { color: #7e22ce; }
+.m-5 { color: #7f1d1d; } .m-6 { color: #0f766e; } .m-7 { color: #000; } .m-8 { color: #334155; }
+
 @keyframes drawWin { to { stroke-dashoffset: 0; } }
 .win-line { stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: drawWin 1s ease-in-out forwards; }
 
@@ -80,6 +88,12 @@ canvas { display:block; max-width:100%; max-height:100%; aspect-ratio:4/5; objec
         <label style="cursor:pointer; color:#e2e8f0;"><input type="radio" name="pMode" value="3"> Rychlovka (3x3)</label>
     </div>
 
+    <div id="miny-settings" style="display:none; margin-bottom:20px; background:var(--card-bg); backdrop-filter:blur(10px); padding:20px; border-radius:15px; border:1px solid var(--card-border); width:100%; max-width:500px; text-align:center;">
+        <p style="margin-bottom:15px; color:var(--c1); font-weight:600;">Vyber obtížnost:</p>
+        <label style="margin-right:15px; cursor:pointer; color:#e2e8f0;"><input type="radio" name="mMode" value="9" checked> 9x9 (10 min)</label>
+        <label style="cursor:pointer; color:#e2e8f0;"><input type="radio" name="mMode" value="16"> 16x16 (40 min)</label>
+    </div>
+
     <div style="background:var(--card-bg); backdrop-filter:blur(10px); padding:20px; border-radius:15px; margin-bottom:25px; width:100%; max-width:500px; border:1px solid var(--card-border);">
         <p style="margin-bottom:10px; color:#e2e8f0;">💻 <b>PC:</b> <span id="i-pc" style="color:#94a3b8;"></span></p>
         <p style="color:#e2e8f0;">📱 <b>Mobil:</b> <span id="i-mob" style="color:#94a3b8;"></span></p>
@@ -104,6 +118,7 @@ canvas { display:block; max-width:100%; max-height:100%; aspect-ratio:4/5; objec
         <button class="btn btn-sec" style="padding:8px 12px; font-size:0.9rem;" onclick="nav('home')">Domů</button>
         <span id="g-stat" style="font-weight:600; font-size:1.1rem; text-align:center;"></span>
         <div style="display:flex; gap:5px;">
+            <button class="btn" id="btn-flag" style="display:none; padding:8px 12px; font-size:0.9rem;" onclick="toggleFlagMode()">⛏️ Odkrýt</button>
             <button class="btn" id="btn-pause" style="display:none; padding:8px 12px; font-size:0.9rem;" onclick="togglePause()">Pauza</button>
             <button class="btn" id="btn-undo" style="display:none; padding:8px 12px; font-size:0.9rem;" onclick="undoP()">Zpět</button>
             <button class="btn btn-sec" style="padding:8px 12px; font-size:0.9rem;" onclick="startG()">Restart</button>
@@ -113,7 +128,7 @@ canvas { display:block; max-width:100%; max-height:100%; aspect-ratio:4/5; objec
     <div id="game-box">
         <canvas id="cvs"></canvas>
         <div id="p-grid"></div>
-        <div id="over" class="overlay">
+        <div id="m-grid"></div> <div id="over" class="overlay">
             <h2 id="e-title" style="color:var(--c2); font-size:2.5rem; font-weight:800; margin-bottom:10px;">Konec</h2>
             <div id="score"></div>
             <div id="new-hs" style="color:#fbbf24; display:none; margin-bottom:20px; font-weight:600; background:rgba(251,191,36,0.1); padding:5px 15px; border-radius:20px;">🎉 Nové nejlepší skóre! 🎉</div>
@@ -146,14 +161,14 @@ const G=[
  {id:4,t:'Kulička',i:'🏓',d:'Odrážej kuličku, bude zrychlovat!',pc:'Šipky L/P',m:'Tlačítka ◀ a ▶'},
  {id:5,t:'Piškvorky',i:'❌',d:'Klasické nebo 3x3 (vyberte před startem).',pc:'Myš',m:'Klepnutí na pole'},
  {id:6,t:'Fotbal Pong',i:'⚽',d:'Pro 2 hráče. Sedněte si proti sobě!',pc:'H1: W/S, H2: Nahoru/Dolů',m:'Polož mobil, každý má svoje šipky'},
- {id:7,t:'Dáma',i:'♟️',d:'Kompletní česká pravidla s dámou!',pc:'Myš',m:'Vyber figurku a ťukni kam s ní'}
+ {id:7,t:'Dáma',i:'♟️',d:'Kompletní česká pravidla s dámou!',pc:'Myš',m:'Vyber figurku a ťukni kam s ní'},
+ {id:8,t:'Hledání min',i:'💣',d:'Klasické hledání min. Bacha na ně!',pc:'Levé tl.: odkrýt, Pravé tl.: vlajka',m:'Tlačítko v liště pro přepnutí ⛏️/🚩, pak ťuknout'}
 ];
 
 let cId=0, loop=0, run=0, isPaused=0, gObj=null;
 const cvs=document.getElementById('cvs'), ctx=cvs.getContext('2d');
 cvs.width=400; cvs.height=500;
 let k={}; 
-// ZAKÁZÁNÍ MEZERNÍKU PRO KLIKÁNÍ NA TLAČÍTKA
 window.onkeydown=e=>{ if(e.code==='Space') e.preventDefault(); k[e.code]=1; }; 
 window.onkeyup=e=>k[e.code]=0;
 
@@ -190,6 +205,8 @@ G.forEach(g=>{
         
         let ps=document.getElementById('pisk-settings');
         if(ps) ps.style.display=(cId===5)?'block':'none';
+        let ms=document.getElementById('miny-settings');
+        if(ms) ms.style.display=(cId===8)?'block':'none';
 
         nav('intro');
     };
@@ -197,7 +214,7 @@ G.forEach(g=>{
 });
 
 function togglePause() {
-    if(!run || cId===5 || cId===7) return;
+    if(!run || cId===5 || cId===7 || cId===8) return;
     isPaused = !isPaused;
     
     let txt = isPaused ? "Zpět" : "Pauza";
@@ -232,7 +249,9 @@ function startG(){
         }
     });
     
-    cvs.style.display=cId===5?'none':'block'; document.getElementById('p-grid').style.display=cId===5?'grid':'none';
+    cvs.style.display=(cId===5||cId===8)?'none':'block'; 
+    document.getElementById('p-grid').style.display=cId===5?'grid':'none';
+    document.getElementById('m-grid').style.display=cId===8?'grid':'none';
     
     let bl=document.getElementById('bl'), br=document.getElementById('br'), ba=document.getElementById('ba'), bd=document.getElementById('bd');
     let p2c=document.getElementById('p2-ctrls'), ctrls=document.getElementById('ctrls'), cBtns=document.getElementById('c-btns');
@@ -240,6 +259,7 @@ function startG(){
     
     bl.style.display='none'; br.style.display='none'; ba.style.display='none'; bd.style.display='none'; p2c.style.display='none'; cBtns.style.display='none';
     document.getElementById('btn-undo').style.display='none';
+    document.getElementById('btn-flag').style.display='none';
     document.getElementById('btn-pause').style.display='none';
     if(p2sys) p2sys.style.display='none';
     if(p1sys) p1sys.style.display='none';
@@ -270,8 +290,11 @@ function startG(){
             document.getElementById('btn-pause').style.display='block';
         }
     }
+    else if(cId===8) { // Miny
+        document.getElementById('btn-flag').style.display='block';
+    }
 
-    if(cId!==2 && cId!==3 && cId!==5 && cId!==7 && !(cId===6 && !isMob)) {
+    if(cId!==2 && cId!==3 && cId!==5 && cId!==7 && cId!==8 && !(cId===6 && !isMob)) {
         ctrls.classList.add('active');
     }
 
@@ -279,6 +302,7 @@ function startG(){
     run=1;
     if(cId===1) gObj=new Tetris(); if(cId===2) gObj=new Flappy(); if(cId===3) gObj=new Dino();
     if(cId===4) gObj=new Pong(); if(cId===5) {initPisk(); return;} if(cId===6) gObj=new P2(); if(cId===7) gObj=new Checkers();
+    if(cId===8) {initMiny(); return;}
     loopF();
 }
 
@@ -314,6 +338,136 @@ function loopF(){
     }
     
     loop=requestAnimationFrame(loopF);
+}
+
+// --- 8. MINY ---
+let mSize=9, mMines=10, mBoard=[], mRev=[], mFlag=[], mFirst=1, mFlagMode=0, mFlagsL=0;
+
+function initMiny(){
+    let mode = document.querySelector('input[name="mMode"]:checked');
+    mSize = mode ? parseInt(mode.value) : 9;
+    mMines = mSize === 16 ? 40 : 10;
+    mFlagsL = mMines; mFirst = 1; mFlagMode = 0;
+    
+    let btnFlag = document.getElementById('btn-flag');
+    btnFlag.innerText = "⛏️ Odkrýt";
+    btnFlag.style.borderColor = "var(--c1)";
+    btnFlag.style.color = "var(--txt)";
+    
+    document.getElementById('g-stat').innerText = '🚩: ' + mFlagsL;
+    document.getElementById('g-stat').style.color = "var(--c2)";
+
+    const d=document.getElementById('m-grid');
+    d.innerHTML='';
+    d.style.gridTemplateColumns = `repeat(${mSize}, 1fr)`;
+    mBoard=[]; mRev=[]; mFlag=[];
+
+    for(let r=0;r<mSize;r++){
+        mBoard[r]=[]; mRev[r]=[]; mFlag[r]=[];
+        for(let c=0;c<mSize;c++){
+            mBoard[r][c]=0; mRev[r][c]=0; mFlag[r][c]=0;
+            let e=document.createElement('div');
+            e.className='m-cell'; e.id=`m${r}-${c}`;
+            e.style.fontSize = mSize===16 ? '0.8rem' : '1.5rem';
+            
+            e.oncontextmenu = (ev) => { ev.preventDefault(); mToggleF(r,c); };
+            e.onclick = () => {
+                if(mFlagMode) mToggleF(r,c); else mClick(r,c);
+            };
+            d.appendChild(e);
+        }
+    }
+}
+
+function toggleFlagMode(){
+    mFlagMode = !mFlagMode;
+    let btn = document.getElementById('btn-flag');
+    if(mFlagMode) {
+        btn.innerText = "🚩 Vlajka";
+        btn.style.borderColor = "var(--c2)";
+        btn.style.color = "var(--c2)";
+    } else {
+        btn.innerText = "⛏️ Odkrýt";
+        btn.style.borderColor = "var(--c1)";
+        btn.style.color = "var(--txt)";
+    }
+}
+
+function mToggleF(r,c){
+    if(!run || mRev[r][c]) return;
+    mFlag[r][c] = !mFlag[r][c];
+    mFlagsL += mFlag[r][c] ? -1 : 1;
+    document.getElementById('g-stat').innerText = '🚩: ' + mFlagsL;
+    let e = document.getElementById(`m${r}-${c}`);
+    e.innerText = mFlag[r][c] ? '🚩' : '';
+}
+
+function mPlace(er, ec){
+    let placed=0;
+    while(placed < mMines){
+        let r=Math.floor(Math.random()*mSize), c=Math.floor(Math.random()*mSize);
+        // První kliknutí nesmí být mina
+        if(mBoard[r][c] !== 'M' && (r !== er || c !== ec)){
+            mBoard[r][c] = 'M'; placed++;
+        }
+    }
+    for(let r=0;r<mSize;r++)for(let c=0;c<mSize;c++){
+        if(mBoard[r][c] === 'M') continue;
+        let n=0;
+        for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){
+            let nr=r+dr, nc=c+dc;
+            if(nr>=0&&nr<mSize&&nc>=0&&nc<mSize&&mBoard[nr][nc]==='M') n++;
+        }
+        mBoard[r][c]=n;
+    }
+}
+
+function mClick(r,c){
+    if(!run || mFlag[r][c] || mRev[r][c]) return;
+    if(mFirst){ mPlace(r,c); mFirst=0; }
+
+    if(mBoard[r][c]==='M'){
+        mRev[r][c]=1;
+        document.getElementById(`m${r}-${c}`).innerText='💥';
+        document.getElementById(`m${r}-${c}`).style.background='#ef4444';
+        document.getElementById(`m${r}-${c}`).style.borderColor='#ef4444';
+        
+        // Odhalení zbylých min
+        for(let i=0;i<mSize;i++)for(let j=0;j<mSize;j++){
+            if(mBoard[i][j]==='M' && !mFlag[i][j] && (i!==r||j!==c)){
+                let el = document.getElementById(`m${i}-${j}`);
+                el.innerText='💣';
+                el.classList.add('rev');
+            }
+        }
+        setTimeout(()=>endG("BOUCHLO TO!","Prohra", false), 1200);
+        run=0; return;
+    }
+
+    mFlood(r,c);
+    checkMWin();
+}
+
+function mFlood(r,c){
+    if(r<0||r>=mSize||c<0||c>=mSize||mRev[r][c]||mFlag[r][c]) return;
+    mRev[r][c]=1;
+    let e = document.getElementById(`m${r}-${c}`);
+    e.classList.add('rev');
+    let v = mBoard[r][c];
+    if(v>0){
+        e.innerText=v; e.classList.add('m-'+v);
+    } else {
+        for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++) mFlood(r+dr,c+dc);
+    }
+}
+
+function checkMWin(){
+    let revCount=0;
+    for(let r=0;r<mSize;r++)for(let c=0;c<mSize;c++) if(mRev[r][c]) revCount++;
+    if(revCount === mSize*mSize - mMines){
+        setTimeout(()=>endG("VŠECHNO ČISTÉ!","Výhra!", false), 800);
+        run=0;
+    }
 }
 
 // --- 1. TETRIS ---
@@ -693,11 +847,10 @@ class Checkers{
                     
                     let huffedSelf = false;
                     if(aJ.length>0){ 
-                        // Pokud hráč přeskočení ignoroval
                         let bl = aJ.find(x => x.sr === sr && x.sc === sc) || aJ[0];
-                        this.b[bl.sr][bl.sc]=0; // vymazání figurky, která měla skákat
+                        this.b[bl.sr][bl.sc]=0; 
                         this.msg="FOUKNUTO!"; this.mt=60;
-                        if(bl.sr === sr && bl.sc === sc) huffedSelf = true; // Pokud to byla zrovna ta, kterou teď táhneme
+                        if(bl.sr === sr && bl.sc === sc) huffedSelf = true; 
                     }
                     
                     if (!huffedSelf) {
@@ -705,7 +858,7 @@ class Checkers{
                         if(r===7 && p===2) p=4;
                         this.b[r][c]=p;
                     }
-                    if (!huffedSelf) this.b[sr][sc]=0; // vymaže se původní políčko
+                    if (!huffedSelf) this.b[sr][sc]=0; 
                     
                     this.t=3-this.t; this.upd(); this.chkL();
                 }
