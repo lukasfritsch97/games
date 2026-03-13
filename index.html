@@ -1,48 +1,70 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Profi Herní Portál</title>
 <style>
-:root{--bg:#0b0c10;--c1:#66fcf1;--c2:#ff00ff;--c3:#39ff14;--txt:#fff;}
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;user-select:none;-webkit-tap-highlight-color:transparent;}
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
 
-body{background:linear-gradient(45deg,#0b0c10,#1f2833,#000,#112233);background-size:400% 400%;animation:bgA 15s ease infinite;color:var(--txt);display:flex;flex-direction:column;height:100dvh;overflow:hidden;}
-@keyframes bgA {0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+:root {
+    --bg-dark: #0f172a;
+    --c1: #38bdf8;
+    --c2: #ec4899;
+    --c3: #10b981;
+    --txt: #f8fafc;
+    --card-bg: rgba(30, 41, 59, 0.6);
+    --card-border: rgba(255, 255, 255, 0.1);
+}
 
-.screen{display:none;flex:1;padding:15px;flex-direction:column;align-items:center;width:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;}
-.screen.active{display:flex;}
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; user-select:none; -webkit-tap-highlight-color:transparent; }
+
+body {
+    background: linear-gradient(-45deg, #0f172a, #1e293b, #020617, #172554);
+    background-size: 400% 400%;
+    animation: bgA 20s ease infinite;
+    color: var(--txt);
+    display: flex; flex-direction: column; height: 100dvh; overflow: hidden;
+}
+
+@keyframes bgA { 0% {background-position:0% 50%} 50% {background-position:100% 50%} 100% {background-position:0% 50%} }
+
+.screen { display:none; flex:1; padding:20px; flex-direction:column; align-items:center; width:100%; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+.screen.active { display:flex; }
 #game.screen { padding: 10px; overflow: hidden; justify-content: space-between; } 
 
-h1{margin-bottom:15px;color:var(--c1);text-transform:uppercase;text-shadow:0 0 15px var(--c1);text-align:center;font-size:2.5rem;letter-spacing:2px;flex-shrink:0;}
-.btn{background:rgba(17,17,17,0.8);color:var(--c1);border:2px solid var(--c1);padding:10px 20px;font-size:1.1rem;border-radius:8px;cursor:pointer;font-weight:bold;margin:5px;box-shadow:0 0 10px var(--c1);transition:0.3s;backdrop-filter:blur(5px);}
-.btn:hover{background:var(--c1);color:#000;}
-.btn-sec{color:var(--c2);border-color:var(--c2);box-shadow:0 0 10px var(--c2);}
-.btn-sec:hover{background:var(--c2);color:#000;}
+h1 { margin-bottom: 20px; color: var(--c1); text-transform: uppercase; font-weight: 800; text-align: center; font-size: 2.5rem; letter-spacing: 1px; flex-shrink: 0; background: -webkit-linear-gradient(45deg, var(--c1), var(--c2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0px 4px 10px rgba(56, 189, 248, 0.3)); }
 
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px;width:100%;max-width:900px;padding-bottom:20px;}
-.card{background:rgba(31,40,51,0.8);backdrop-filter:blur(10px);border-radius:15px;padding:25px;text-align:center;cursor:pointer;border:1px solid rgba(102,252,241,0.3);transition:0.3s;box-shadow:0 8px 32px rgba(0,0,0,0.5);}
-.card:hover{border-color:var(--c1);box-shadow:0 0 20px rgba(102,252,241,0.6);transform:translateY(-5px);}
-.icon{font-size:3.5rem;margin-bottom:10px;text-shadow:0 0 15px rgba(255,255,255,0.4);}
+.btn { background: rgba(255, 255, 255, 0.05); color: var(--txt); border: 1px solid var(--c1); padding: 12px 24px; font-size: 1rem; border-radius: 12px; cursor: pointer; font-weight: 600; margin: 5px; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.2); transition: all 0.3s ease; backdrop-filter: blur(5px); }
+.btn:hover { background: var(--c1); color: #000; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4); }
+.btn-sec { border-color: var(--c2); box-shadow: 0 4px 15px rgba(236, 72, 153, 0.2); }
+.btn-sec:hover { background: var(--c2); color: #fff; box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4); }
 
-#game-box{position:relative;width:100%;max-width:500px;flex:1;min-height:0;background:#000;border:2px solid var(--c1);border-radius:10px;box-shadow:0 0 20px var(--c1);display:flex;justify-content:center;align-items:center;overflow:hidden;margin-bottom:10px;}
-canvas{display:block;max-width:100%;max-height:100%;aspect-ratio:4/5;object-fit:contain;}
+.grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:20px; width:100%; max-width:1000px; padding-bottom:30px; }
+.card { background: var(--card-bg); backdrop-filter: blur(12px); border-radius: 20px; padding: 30px 20px; text-align: center; cursor: pointer; border: 1px solid var(--card-border); transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+.card:hover { border-color: var(--c1); box-shadow: 0 10px 40px rgba(56, 189, 248, 0.2); transform: translateY(-8px); }
+.card h2 { font-weight: 600; font-size: 1.3rem; margin-top: 10px; }
+.icon { font-size: 3.5rem; margin-bottom: 10px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)); }
 
-/* PŘIDÁN position:relative PRO KOREKTNÍ UMÍSTĚNÍ ŠKRTACÍ ČÁRY */
-#p-grid{display:none;position:relative;grid-template-columns:repeat(15,1fr);width:100%;max-width:500px;max-height:100%;aspect-ratio:1;background:var(--c1);gap:2px;padding:2px;box-shadow:0 0 20px var(--c1);}
-.cell{background:#111;display:flex;justify-content:center;align-items:center;font-size:1.8rem;font-weight:bold;cursor:pointer;aspect-ratio:1;overflow:hidden;line-height:1;}
-.cell.x{color:var(--c2);text-shadow:0 0 15px var(--c2);} .cell.o{color:var(--c1);text-shadow:0 0 15px var(--c1);}
+#game-box { position:relative; width:100%; max-width:500px; flex:1; min-height:0; background: #020617; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; overflow:hidden; margin-bottom:15px; }
+canvas { display:block; max-width:100%; max-height:100%; aspect-ratio:4/5; object-fit:contain; border-radius: 16px; }
 
-.overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:none;flex-direction:column;justify-content:center;align-items:center;z-index:10;}
-.overlay.active{display:flex;}
-#score{font-size:2.5rem;color:var(--c3);margin:5px 0;text-shadow:0 0 10px var(--c3);}
+#p-grid { display:none; position:relative; grid-template-columns:repeat(15, 1fr); width:100%; max-width:500px; max-height:100%; aspect-ratio:1; background: var(--c1); gap:2px; padding:2px; box-shadow: 0 0 20px rgba(56,189,248,0.3); border-radius: 10px;}
+.cell { background: #0f172a; display:flex; justify-content:center; align-items:center; font-size:1.8rem; font-weight:bold; cursor:pointer; aspect-ratio:1; overflow:hidden; line-height:1; border-radius: 4px; transition: 0.2s;}
+.cell:hover { background: #1e293b; }
+.cell.x { color: var(--c2); text-shadow: 0 0 10px var(--c2); } .cell.o { color: var(--c1); text-shadow: 0 0 10px var(--c1); }
 
-.controls{display:none;width:100%;max-width:500px;justify-content:space-between;align-items:flex-end;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom);}
-@media(pointer:coarse){.controls.active{display:flex;}}
+.overlay { position:absolute; top:0; left:0; width:100%; height:100%; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(5px); display:none; flex-direction:column; justify-content:center; align-items:center; z-index:10; border-radius: 16px;}
+.overlay.active { display:flex; }
+#score { font-size: 3rem; color: var(--c3); margin: 10px 0; font-weight: 800; text-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
 
-.m-btn{background:rgba(102,252,241,0.1);border:2px solid var(--c1);color:var(--c1);border-radius:50%;width:60px;height:60px;font-size:24px;text-shadow:0 0 5px var(--c1);backdrop-filter:blur(5px);touch-action:manipulation;display:flex;justify-content:center;align-items:center;}
-.top-bar{width:100%;max-width:500px;display:flex;justify-content:space-between;margin-bottom:10px;flex-shrink:0;}
-#hs-disp{color:gold;font-weight:bold;margin-bottom:15px;font-size:1.2rem;display:none;}
+.controls { display:none; width:100%; max-width:500px; justify-content:space-between; align-items:flex-end; flex-shrink:0; padding-bottom:env(safe-area-inset-bottom); }
+@media(pointer:coarse) { .controls.active { display:flex; } }
+
+.m-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--c1); color: var(--c1); border-radius: 50%; width: 65px; height: 65px; font-size: 24px; backdrop-filter: blur(5px); touch-action: manipulation; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: 0.1s; }
+.m-btn:active { transform: scale(0.9); background: rgba(56,189,248,0.2); }
+.top-bar { width:100%; max-width:500px; display:flex; justify-content:space-between; align-items: center; margin-bottom:15px; flex-shrink:0; }
+#hs-disp { color: #fbbf24; font-weight:600; margin-bottom:15px; font-size:1.1rem; display:none; background: rgba(251, 191, 36, 0.1); padding: 5px 15px; border-radius: 20px; }
 </style>
 </head>
 <body>
@@ -54,20 +76,20 @@ canvas{display:block;max-width:100%;max-height:100%;aspect-ratio:4/5;object-fit:
 
 <div id="intro" class="screen">
     <h1 id="i-title"></h1>
-    <div id="hs-disp">Nejlepší skóre: <span id="hs-val">0</span></div>
-    <p id="i-desc" style="max-width:500px;text-align:center;margin-bottom:20px;font-size:1.1rem;"></p>
+    <div id="hs-disp">🏆 Nejlepší skóre: <span id="hs-val">0</span></div>
+    <p id="i-desc" style="max-width:500px; text-align:center; margin-bottom:20px; font-size:1.1rem; color: #cbd5e1;"></p>
     
-    <div id="pisk-settings" style="display:none; margin-bottom:20px; background:rgba(31,40,51,0.8); backdrop-filter:blur(5px); padding:20px; border-radius:10px; border:1px solid var(--c2); width:100%; max-width:500px; text-align:center;">
-        <p style="margin-bottom:10px; color:var(--c1); font-weight:bold;">Vyber velikost hracího pole:</p>
-        <label style="margin-right:15px; cursor:pointer;"><input type="radio" name="pMode" value="15" checked> Klasika (15x15, 5 v řadě)</label>
-        <label style="cursor:pointer;"><input type="radio" name="pMode" value="3"> Rychlovka (3x3, 3 v řadě)</label>
+    <div id="pisk-settings" style="display:none; margin-bottom:20px; background:var(--card-bg); backdrop-filter:blur(10px); padding:20px; border-radius:15px; border:1px solid var(--card-border); width:100%; max-width:500px; text-align:center;">
+        <p style="margin-bottom:15px; color:var(--c1); font-weight:600;">Vyber velikost hracího pole:</p>
+        <label style="margin-right:15px; cursor:pointer; color:#e2e8f0;"><input type="radio" name="pMode" value="15" checked> Klasika (15x15)</label>
+        <label style="cursor:pointer; color:#e2e8f0;"><input type="radio" name="pMode" value="3"> Rychlovka (3x3)</label>
     </div>
 
-    <div style="background:rgba(31,40,51,0.8);backdrop-filter:blur(5px);padding:20px;border-radius:10px;margin-bottom:20px;width:100%;max-width:500px;border:1px solid #333;">
-        <p style="margin-bottom:10px;">💻 <b>PC:</b> <span id="i-pc"></span></p>
-        <p>📱 <b>Mobil:</b> <span id="i-mob"></span></p>
+    <div style="background:var(--card-bg); backdrop-filter:blur(10px); padding:20px; border-radius:15px; margin-bottom:25px; width:100%; max-width:500px; border:1px solid var(--card-border);">
+        <p style="margin-bottom:10px; color:#e2e8f0;">💻 <b>PC:</b> <span id="i-pc" style="color:#94a3b8;"></span></p>
+        <p style="color:#e2e8f0;">📱 <b>Mobil:</b> <span id="i-mob" style="color:#94a3b8;"></span></p>
     </div>
-    <div style="display:flex;gap:10px;"><button class="btn" onclick="startG()">HRÁT</button><button class="btn btn-sec" onclick="nav('home')">ZPĚT</button></div>
+    <div style="display:flex; gap:15px;"><button class="btn" onclick="startG()">HRÁT HNED</button><button class="btn btn-sec" onclick="nav('home')">ZPĚT</button></div>
 </div>
 
 <div id="game" class="screen">
@@ -78,11 +100,11 @@ canvas{display:block;max-width:100%;max-height:100%;aspect-ratio:4/5;object-fit:
     </div>
 
     <div class="top-bar" id="t-bar">
-        <button class="btn btn-sec" style="padding:6px 12px;font-size:0.9rem;" onclick="nav('home')">Domů</button>
-        <span id="g-stat" style="font-weight:bold;line-height:2.2;font-size:1rem;text-shadow:0 0 5px #fff;"></span>
-        <div style="display:flex;gap:5px;">
-            <button class="btn" id="btn-undo" style="display:none;padding:6px 12px;font-size:0.9rem;" onclick="undoP()">Zpět</button>
-            <button class="btn btn-sec" style="padding:6px 12px;font-size:0.9rem;" onclick="startG()">Restart</button>
+        <button class="btn btn-sec" style="padding:8px 16px; font-size:0.9rem;" onclick="nav('home')">Domů</button>
+        <span id="g-stat" style="font-weight:600; font-size:1.1rem;"></span>
+        <div style="display:flex; gap:8px;">
+            <button class="btn" id="btn-undo" style="display:none; padding:8px 16px; font-size:0.9rem;" onclick="undoP()">Zpět</button>
+            <button class="btn btn-sec" style="padding:8px 16px; font-size:0.9rem;" onclick="startG()">Restart</button>
         </div>
     </div>
 
@@ -90,22 +112,22 @@ canvas{display:block;max-width:100%;max-height:100%;aspect-ratio:4/5;object-fit:
         <canvas id="cvs"></canvas>
         <div id="p-grid"></div>
         <div id="over" class="overlay">
-            <h2 id="e-title" style="color:var(--c2);text-shadow:0 0 10px var(--c2);font-size:2rem;">Konec</h2>
+            <h2 id="e-title" style="color:var(--c2); font-size:2.5rem; font-weight:800; margin-bottom:10px;">Konec</h2>
             <div id="score"></div>
-            <div id="new-hs" style="color:gold;display:none;margin-bottom:10px;font-weight:bold;">Nové nejlepší skóre!</div>
-            <div style="display:flex;gap:10px;margin-top:10px;"><button class="btn" onclick="startG()">ZNOVU</button><button class="btn btn-sec" onclick="nav('home')">DOMŮ</button></div>
+            <div id="new-hs" style="color:#fbbf24; display:none; margin-bottom:20px; font-weight:600; background:rgba(251,191,36,0.1); padding:5px 15px; border-radius:20px;">🎉 Nové nejlepší skóre! 🎉</div>
+            <div style="display:flex; gap:15px; margin-top:20px;"><button class="btn" onclick="startG()">ZNOVU</button><button class="btn btn-sec" onclick="nav('home')">DOMŮ</button></div>
         </div>
     </div>
     
     <div id="ctrls" class="controls">
-        <div id="left-btns" style="display:flex;gap:15px;align-items:flex-end;">
+        <div id="left-btns" style="display:flex; gap:15px; align-items:flex-end;">
             <button class="m-btn" id="bl">◀</button>
             <button class="btn btn-sec" id="pong-home" style="display:none; margin:auto; font-size:0.9rem;" onclick="nav('home')">Domů</button>
             <button class="m-btn" id="br">▶</button>
         </div>
-        <div id="right-btns" style="display:flex;flex-direction:column;gap:10px;align-items:flex-end;">
-            <button class="m-btn" id="ba" style="border-color:var(--c2);color:var(--c2);">↻</button>
-            <button class="m-btn" id="bd" style="border-color:var(--c3);color:var(--c3);">▼</button>
+        <div id="right-btns" style="display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
+            <button class="m-btn" id="ba" style="border-color:var(--c2); color:var(--c2);">↻</button>
+            <button class="m-btn" id="bd" style="border-color:var(--c3); color:var(--c3);">▼</button>
         </div>
     </div>
 </div>
@@ -148,7 +170,7 @@ G.forEach(g=>{
     d.onclick=()=>{
         cId=g.id; document.getElementById('i-title').innerText=g.t; document.getElementById('i-desc').innerText=g.d; document.getElementById('i-pc').innerText=g.pc; document.getElementById('i-mob').innerText=g.m; 
         let hd=document.getElementById('hs-disp');
-        if(cId<=4){hd.style.display='block'; document.getElementById('hs-val').innerText=getHS(cId);} else hd.style.display='none';
+        if(cId<=4){hd.style.display='inline-block'; document.getElementById('hs-val').innerText=getHS(cId);} else hd.style.display='none';
         
         let ps=document.getElementById('pisk-settings');
         if(ps) ps.style.display=(cId===5)?'block':'none';
@@ -205,7 +227,7 @@ function endG(s,t="Konec Hry", isScore=true){
     if(cId<=4 && isScore){
         let numS = Math.floor(s);
         let hs = getHS(cId);
-        if(numS > hs){ setHS(cId, numS); document.getElementById('new-hs').style.display='block'; }
+        if(numS > hs){ setHS(cId, numS); document.getElementById('new-hs').style.display='inline-block'; }
         dispScore = "Skóre: " + numS;
     }
     document.getElementById('score').innerText=dispScore; 
@@ -217,7 +239,7 @@ function loopF(){if(!run)return; ctx.clearRect(0,0,400,500); gObj.u(); gObj.d(ct
 
 // --- 1. TETRIS ---
 const SH=[[],[[1,1,1,1]],[[1,1],[1,1]],[[0,1,0],[1,1,1]],[[1,1,0],[0,1,1]],[[0,1,1],[1,1,0]],[[1,0,0],[1,1,1]],[[0,0,1],[1,1,1]]];
-const CLS=['#111','#0cf','#00f','#fa0','#ff0','#0c0','#a0f','#f00']; 
+const CLS=['#0f172a','#38bdf8','#3b82f6','#fb923c','#facc15','#4ade80','#c084fc','#f87171']; 
 class Tetris{
     constructor(){this.b=Array.from({length:20},()=>Array(10).fill(0)); this.sc=0; this.f=0; this.spawn(); this.rL=0;}
     spawn(){let t=Math.floor(Math.random()*7)+1; this.p={m:SH[t], x:3, y:0, c:t}; if(this.col(0,0)) endG(this.sc);}
@@ -242,19 +264,20 @@ class Tetris{
     }
     fB(c,x,y,v){
         c.fillStyle=CLS[v]; c.fillRect(x,y,20,20);
-        c.strokeStyle='#000'; c.lineWidth=2; c.strokeRect(x+1,y+1,18,18);
-        c.fillStyle='rgba(255,255,255,0.4)'; c.fillRect(x+2,y+2,16,2); c.fillRect(x+2,y+2,2,16);
+        c.strokeStyle='rgba(0,0,0,0.5)'; c.lineWidth=2; c.strokeRect(x+1,y+1,18,18);
+        c.fillStyle='rgba(255,255,255,0.2)'; c.fillRect(x+2,y+2,16,4); c.fillRect(x+2,y+2,4,16);
     }
     d(c){
-        c.fillStyle='#222'; c.fillRect(50,0,200,400); 
-        c.strokeStyle='#111'; c.lineWidth=1; for(let i=0;i<10;i++)for(let j=0;j<20;j++) c.strokeRect(50+i*20,j*20,20,20);
+        c.fillStyle='#0f172a'; c.fillRect(50,0,200,400); 
+        c.strokeStyle='rgba(255,255,255,0.05)'; c.lineWidth=1; for(let i=0;i<10;i++)for(let j=0;j<20;j++) c.strokeRect(50+i*20,j*20,20,20);
         for(let r=0;r<20;r++)for(let cl=0;cl<10;cl++)if(this.b[r][cl]) this.fB(c,50+cl*20,r*20,this.b[r][cl]);
         for(let r=0;r<this.p.m.length;r++)for(let cl=0;cl<this.p.m[r].length;cl++)if(this.p.m[r][cl]) this.fB(c,50+(this.p.x+cl)*20,(this.p.y+r)*20,this.p.c);
-        c.fillStyle='#fff'; c.font='20px Arial'; c.fillText("Skóre: "+this.sc, 260, 30);
+        c.fillStyle='#fff'; c.font='600 20px Poppins'; c.fillText("Skóre:", 270, 40);
+        c.fillStyle='var(--c1)'; c.font='800 24px Poppins'; c.fillText(this.sc, 270, 70);
     }
 }
 
-// --- 2. FLAPPY ---
+// --- 2. FLAPPY (Nová texturovaná verze s animací) ---
 class Flappy{
     constructor(){this.y=250;this.v=0;this.p=[];this.s=0;this.f=0;this.started=0;}
     u(){
@@ -270,53 +293,149 @@ class Flappy{
         if(this.y>500||this.y<0) endG(this.s); this.p=this.p.filter(p=>p.x>-50); this.f++;
     }
     d(c){
-        c.fillStyle='#87CEEB';c.fillRect(0,0,400,500); 
-        c.fillStyle='#2ECC71'; c.strokeStyle='#27AE60'; c.lineWidth=3;
+        // Moderní obloha
+        let grd = c.createLinearGradient(0,0,0,500);
+        grd.addColorStop(0,"#38bdf8"); grd.addColorStop(1,"#bae6fd");
+        c.fillStyle=grd; c.fillRect(0,0,400,500); 
+
+        // Sloupy (moderní gradient)
         this.p.forEach(p=>{
-            c.fillRect(p.x,0,50,p.y-70); c.strokeRect(p.x,0,50,p.y-70);
-            c.fillRect(p.x,p.y+70,50,500); c.strokeRect(p.x,p.y+70,50,500);
+            let pGrd = c.createLinearGradient(p.x, 0, p.x+50, 0);
+            pGrd.addColorStop(0,"#22c55e"); pGrd.addColorStop(1,"#16a34a");
+            c.fillStyle=pGrd;
+            c.fillRect(p.x,0,50,p.y-70); 
+            c.fillRect(p.x,p.y+70,50,500); 
+            // Okraje sloupů
+            c.fillStyle="#15803d";
+            c.fillRect(p.x-5, p.y-70-20, 60, 20);
+            c.fillRect(p.x-5, p.y+70, 60, 20);
         }); 
-        c.font='35px Arial';c.fillText('🦅',20,this.y); 
-        c.fillStyle='#fff';c.font='bold 30px Arial';c.fillText(this.s,10,40);
-        if(!this.started){c.fillStyle='#111';c.font='bold 20px Arial';c.fillText('Klikni pro skok!', 120, 200);}
+
+        // Vykreslení animovaného ptáčka místo Emoji
+        c.save();
+        c.translate(40, this.y);
+        // Naklánění podle rychlosti padání/skoku
+        let rotation = Math.min(Math.PI / 4, Math.max(-Math.PI / 4, (this.v * 0.1)));
+        c.rotate(rotation);
+
+        // Tělo (žluté kolečko)
+        c.fillStyle = '#facc15'; c.beginPath(); c.arc(0, 0, 14, 0, Math.PI*2); c.fill();
+        c.lineWidth = 2; c.strokeStyle = '#ca8a04'; c.stroke();
+        
+        // Bříško (světlejší)
+        c.fillStyle = '#fef08a'; c.beginPath(); c.arc(0, 5, 10, 0, Math.PI); c.fill();
+
+        // Křídlo (animované)
+        let wingAnim = (this.f % 16 < 8) ? 6 : -4; // kmitání křídla
+        c.fillStyle = '#eab308';
+        c.beginPath(); c.ellipse(-4, wingAnim, 10, 6, -0.2, 0, Math.PI*2); c.fill();
+        c.stroke();
+
+        // Oko
+        c.fillStyle = 'white'; c.beginPath(); c.arc(6, -5, 6, 0, Math.PI*2); c.fill();
+        c.fillStyle = 'black'; c.beginPath(); c.arc(8, -5, 2.5, 0, Math.PI*2); c.fill();
+
+        // Zobák
+        c.fillStyle = '#f97316';
+        c.beginPath(); c.moveTo(12, 0); c.lineTo(26, 4); c.lineTo(12, 8); c.fill();
+        c.stroke();
+
+        c.restore();
+
+        // UI Texty
+        c.fillStyle='rgba(0,0,0,0.5)'; c.font='800 40px Poppins'; c.fillText(this.s,12,42);
+        c.fillStyle='#fff'; c.fillText(this.s,10,40);
+        if(!this.started){
+            c.fillStyle='rgba(0,0,0,0.7)'; c.font='600 20px Poppins'; 
+            c.fillText('Klikni pro skok!', 120, 200);
+        }
     }
 }
 
-// --- 3. DINO ---
+// --- 3. DINO (Nová texturovaná verze s animací běhu) ---
 class Dino{
     constructor(){this.y=350;this.v=0;this.o=[];this.s=0;this.f=0;this.sp=5;}
     u(){
         this.v+=0.6; this.y+=this.v; if(this.y>350){this.y=350;this.v=0;}
         if((k.Space||mA)&&this.y===350)this.v=-12;
-        if(this.f%(Math.floor(Math.random()*50)+50)===0) this.o.push({x:400,w:30,h:40});
-        this.o.forEach(o=>{ o.x-=this.sp; if(50<o.x+o.w&&80>o.x&&this.y+30>380-o.h)endG(this.s); });
+        if(this.f%(Math.floor(Math.random()*50)+50)===0) this.o.push({x:400,w:20,h:Math.random()>0.5?40:55});
+        this.o.forEach(o=>{ o.x-=this.sp; if(50<o.x+o.w&&70>o.x&&this.y+30>380-o.h)endG(this.s); });
         this.o=this.o.filter(o=>o.x>-50); this.s+=0.05; this.sp+=0.002; this.f++;
     }
     d(c){
-        c.fillStyle='#1f2833';c.fillRect(0,0,400,500); 
-        c.fillStyle='#e94560'; c.fillRect(0,380,400,3); 
-        c.font='40px Arial';c.fillText('🦖',40,this.y+35); 
-        this.o.forEach(o=>{ c.font='35px Arial'; c.fillText('🌵', o.x, 380); }); 
-        c.fillStyle='#fff';c.font='bold 20px Arial';c.fillText(Math.floor(this.s),10,40);
+        // Moderní poušť
+        c.fillStyle='#0f172a'; c.fillRect(0,0,400,500); 
+        c.fillStyle='#334155'; c.fillRect(0,380,400,120); 
+        c.fillStyle='var(--c1)'; c.fillRect(0,380,400,3); // Neon line
+        
+        // Vykreslení kaktusů místo emoji
+        this.o.forEach(o=>{ 
+            c.fillStyle = '#10b981'; // Zelený kaktus
+            let cx = o.x; let cy = 380 - o.h;
+            c.fillRect(cx, cy, o.w, o.h); 
+            // Větve kaktusu
+            c.fillRect(cx - 10, cy + 10, 10, 15);
+            c.fillRect(cx + o.w, cy + 20, 10, 15);
+        }); 
+
+        // Vykreslení animovaného Dinosoura
+        let isLeftFoot = (this.f % 16 < 8); // Animace kroků
+        let isGrounded = (this.y === 350);
+        
+        c.fillStyle = '#ec4899'; // Neonově růžový dino
+        
+        // Tělo
+        c.fillRect(35, this.y, 20, 25);
+        // Ocas
+        c.fillRect(25, this.y + 5, 10, 8);
+        // Hlava
+        c.fillRect(45, this.y - 15, 18, 18);
+        // Tlama (zub)
+        c.fillStyle = '#0f172a';
+        c.fillRect(55, this.y - 5, 8, 3);
+        // Oko
+        c.fillStyle = 'white'; c.fillRect(53, this.y - 12, 4, 4);
+        c.fillStyle = 'black'; c.fillRect(55, this.y - 12, 2, 2);
+        
+        // Ruce
+        c.fillStyle = '#be185d';
+        c.fillRect(55, this.y + 5, 8, 4);
+
+        // Nohy (animované podle běhu a výskoku)
+        if (!isGrounded) {
+            // Skok - nohy skrčené
+            c.fillRect(38, this.y + 25, 6, 8);
+            c.fillRect(48, this.y + 25, 6, 8);
+        } else {
+            // Běh - kmitání nohou
+            c.fillRect(38, this.y + 25, 6, 12 + (isLeftFoot ? 0 : -6));
+            c.fillRect(48, this.y + 25, 6, 12 + (!isLeftFoot ? 0 : -6));
+        }
+
+        // Skóre
+        c.fillStyle='#fff'; c.font='800 24px Poppins'; 
+        c.fillText(Math.floor(this.s).toString().padStart(5, '0'), 300, 40);
     }
 }
 
 // --- 4. KULIČKA ---
 class Pong{
-    constructor(){this.px=150;this.bx=200;this.by=200;this.vx=3;this.vy=-3;this.s=0;}
+    constructor(){this.px=150;this.bx=200;this.by=200;this.vx=4;this.vy=-4;this.s=0;}
     u(){
-        if(k.ArrowLeft||mL)this.px-=6; if(k.ArrowRight||mR)this.px+=6;
+        if(k.ArrowLeft||mL)this.px-=7; if(k.ArrowRight||mR)this.px+=7;
         if(this.px<0)this.px=0; if(this.px>300)this.px=300;
         this.bx+=this.vx; this.by+=this.vy;
-        if(this.bx<5||this.bx>395)this.vx*=-1; if(this.by<5)this.vy*=-1;
-        if(this.by>470&&this.by<480&&this.bx>this.px&&this.bx<this.px+100){this.vy=-Math.abs(this.vy)*1.05; this.vx*=1.05; this.by=470; this.s++;}
+        if(this.bx<8||this.bx>392)this.vx*=-1; if(this.by<8)this.vy*=-1;
+        if(this.by>470&&this.by<480&&this.bx>this.px-5&&this.bx<this.px+105){this.vy=-Math.abs(this.vy)*1.05; this.vx*=1.05; this.by=470; this.s++;}
         if(this.by>500)endG(this.s);
     }
     d(c){
-        c.fillStyle='#16213e'; c.fillRect(0,0,400,500);
-        c.fillStyle='#e94560'; c.fillRect(this.px,480,100,10); 
-        c.fillStyle='#fff'; c.beginPath();c.arc(this.bx,this.by,8,0,7);c.fill();
-        c.font='bold 30px Arial';c.fillText(this.s,10,40);
+        c.fillStyle='#0f172a'; c.fillRect(0,0,400,500);
+        c.fillStyle='var(--c1)'; c.beginPath(); c.roundRect(this.px, 480, 100, 10, 5); c.fill();
+        c.shadowBlur = 15; c.shadowColor = 'var(--c2)';
+        c.fillStyle='var(--c2)'; c.beginPath();c.arc(this.bx,this.by,8,0,7);c.fill();
+        c.shadowBlur = 0;
+        c.fillStyle='rgba(255,255,255,0.1)'; c.font='800 100px Poppins'; c.textAlign='center'; c.fillText(this.s, 200, 300); c.textAlign='left';
     }
 }
 
@@ -376,26 +495,26 @@ class P2{
         if(this.s2>4)endG(this.s1+"-"+this.s2,"Červená Vyhrála", false);
     }
     d(c){
-        c.fillStyle='#16213e'; c.fillRect(0,0,400,500);
+        c.fillStyle='#0f172a'; c.fillRect(0,0,400,500);
         if(this.isMob){
-            c.strokeStyle='rgba(255,255,255,0.2)'; c.lineWidth=2; c.setLineDash([10,10]); 
+            c.strokeStyle='rgba(255,255,255,0.1)'; c.lineWidth=3; c.setLineDash([10,10]); 
             c.beginPath(); c.moveTo(0,250); c.lineTo(400,250); c.stroke(); c.setLineDash([]);
             c.beginPath(); c.arc(200,250,50,0,Math.PI*2); c.stroke();
             
-            c.fillStyle='#3498db'; c.fillRect(this.x1,485,80,10); 
-            c.fillStyle='#e94560'; c.fillRect(this.x2,5,80,10);   
+            c.fillStyle='var(--c1)'; c.beginPath(); c.roundRect(this.x1,485,80,10,5); c.fill(); 
+            c.fillStyle='var(--c2)'; c.beginPath(); c.roundRect(this.x2,5,80,10,5); c.fill();   
             
             c.fillStyle='#fff'; c.beginPath();c.arc(this.bx,this.by,8,0,7);c.fill(); 
             
-            c.save(); c.translate(200, 200); c.rotate(Math.PI); c.fillStyle='#e94560'; c.font='bold 30px Arial'; c.fillText(this.s2, -10, 0); c.restore();
-            c.fillStyle='#3498db'; c.font='bold 30px Arial'; c.fillText(this.s1, 190, 290);
-            if(this.w>0){c.fillStyle='#fff'; c.fillText("Připravit...", 130, 260);}
+            c.save(); c.translate(200, 200); c.rotate(Math.PI); c.fillStyle='var(--c2)'; c.font='800 40px Poppins'; c.fillText(this.s2, -10, 0); c.restore();
+            c.fillStyle='var(--c1)'; c.font='800 40px Poppins'; c.fillText(this.s1, 190, 300);
+            if(this.w>0){c.fillStyle='#fff'; c.font='600 20px Poppins'; c.fillText("Připravit...", 150, 280);}
         } else {
-            c.fillStyle='#3498db'; c.fillRect(10,this.y1,10,80); 
-            c.fillStyle='#e94560'; c.fillRect(380,this.y2,10,80); 
+            c.fillStyle='var(--c1)'; c.beginPath(); c.roundRect(10,this.y1,10,80,5); c.fill(); 
+            c.fillStyle='var(--c2)'; c.beginPath(); c.roundRect(380,this.y2,10,80,5); c.fill(); 
             c.fillStyle='#fff'; c.beginPath();c.arc(this.bx,this.by,8,0,7);c.fill(); 
-            c.font='bold 30px Arial';c.fillText(this.s1+" - "+this.s2,165,40);
-            if(this.w>0){c.fillStyle='#fff'; c.fillText("Připravit...", 130, 200);}
+            c.font='800 30px Poppins'; c.textAlign='center'; c.fillText(this.s1+" - "+this.s2, 200, 40); c.textAlign='left';
+            if(this.w>0){c.fillStyle='#fff'; c.font='600 20px Poppins'; c.fillText("Připravit...", 150, 200);}
         }
     }
 }
@@ -427,7 +546,7 @@ class Checkers{
         cvs.onmousedown = clickHandler;
         cvs.ontouchstart = clickHandler;
     }
-    upd(){ document.getElementById('g-stat').innerText="Hraje: "+(this.t===1?"Modrá":"Červená"); document.getElementById('g-stat').style.color=this.t===1?"#3498db":"#e94560"; }
+    upd(){ document.getElementById('g-stat').innerText="Hraje: "+(this.t===1?"Modrá":"Růžová"); document.getElementById('g-stat').style.color=this.t===1?"var(--c1)":"var(--c2)"; }
     
     chkL(){
         let canMove=false;
@@ -439,7 +558,7 @@ class Checkers{
             }
             if(canMove)break;
         }
-        if(!canMove) endG("", (this.t===1?"Červená":"Modrá")+" vyhrála!", false);
+        if(!canMove) endG("", (this.t===1?"Růžová":"Modrá")+" vyhrála!", false);
     }
 
     getJ(r,c){ 
@@ -524,20 +643,20 @@ class Checkers{
     d(ctx){
         let w=400/8, h=500/8;
         for(let r=0;r<8;r++)for(let c=0;c<8;c++){
-            ctx.fillStyle=(r+c)%2?'#1a1a2e':'#eee'; ctx.fillRect(c*w,r*h,w,h);
+            ctx.fillStyle=(r+c)%2?'#1e293b':'#cbd5e1'; ctx.fillRect(c*w,r*h,w,h);
             let p=this.b[r][c];
             if(p){
-                ctx.fillStyle=(p%2||2)===1?'#3498db':'#e94560'; 
-                ctx.beginPath(); ctx.arc(c*w+w/2,r*h+h/2,w/2-5,0,7); ctx.fill(); 
+                ctx.fillStyle=(p%2||2)===1?'#38bdf8':'#ec4899'; 
+                ctx.beginPath(); ctx.arc(c*w+w/2,r*h+h/2,w/2-6,0,7); ctx.fill(); 
                 if(p>2){ ctx.fillStyle='gold'; ctx.beginPath(); ctx.arc(c*w+w/2,r*h+h/2,8,0,7); ctx.fill(); }
             }
         }
-        if(this.s){ctx.strokeStyle='yellow';ctx.lineWidth=4;ctx.strokeRect(this.s.c*w,this.s.r*h,w,h);}
-        if(this.mt>0){ctx.fillStyle='red';ctx.font='bold 40px Arial';ctx.fillText(this.msg,60,250);}
+        if(this.s){ctx.strokeStyle='#fbbf24';ctx.lineWidth=4;ctx.strokeRect(this.s.c*w,this.s.r*h,w,h);}
+        if(this.mt>0){ctx.fillStyle='#ef4444';ctx.font='800 40px Poppins';ctx.fillText(this.msg,60,250);}
     }
 }
 
-// --- 5. PIŠKVORKY (UPRAVENÉ) ---
+// --- 5. PIŠKVORKY ---
 let pB=[], pH=[], pT='x', pSize=15, pWin=5;
 
 function initPisk(){
@@ -582,7 +701,7 @@ function pClk(r,c){
         let x2 = (winLine[winLine.length-1].c + 0.5) * w;
         let y2 = (winLine[winLine.length-1].r + 0.5) * w;
         
-        if(svg) svg.innerHTML = `<line x1="${x1}%" y1="${y1}%" x2="${x2}%" y2="${y2}%" stroke="white" stroke-width="${pSize===3?15:6}" stroke-linecap="round" filter="drop-shadow(0 0 5px white)" />`;
+        if(svg) svg.innerHTML = `<line x1="${x1}%" y1="${y1}%" x2="${x2}%" y2="${y2}%" stroke="white" stroke-width="${pSize===3?15:6}" stroke-linecap="round" filter="drop-shadow(0 0 10px white)" />`;
         
         endG(pT.toUpperCase()+" vyhrál!","Konec", false);
         return;
