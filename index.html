@@ -220,7 +220,6 @@ function startG(){
     nav('game'); document.getElementById('over').classList.remove('active');
     document.getElementById('new-hs').style.display='none';
     
-    // OPRAVA 4: VŽDY SE UJISTIT, ŽE JE LIŠTA ZOBRAZENA PŘI STARTU
     document.getElementById('t-bar').style.display='flex';
     
     isPaused=0; 
@@ -268,7 +267,6 @@ function startG(){
             if(p2sys) p2sys.style.display='flex';
             if(p1sys) p1sys.style.display='flex';
         } else {
-            // OPRAVA 3: TLAČÍTKO PAUZA NA PC U FOTBAL PONGU
             document.getElementById('btn-pause').style.display='block';
         }
     }
@@ -363,7 +361,7 @@ class Flappy{
     constructor(){this.y=250;this.v=0;this.p=[];this.s=0;this.f=0;this.started=0;}
     tap() {
         if(!this.started){this.started=1;} 
-        this.v=-7; // OPRAVA 1: Rychlejší skákání bez čekání na pád
+        this.v=-7; 
     }
     u(){
         if(k.Space||mA) this.tap();
@@ -420,7 +418,6 @@ class Flappy{
 class Dino{
     constructor(){this.y=350;this.v=0;this.o=[];this.s=0;this.f=0;this.sp=5;this.started=0;}
     tap() { 
-        // OPRAVA 2: Dinosaurus čeká na kliknutí
         if(!this.started){this.started=1; this.v=-12;}
         else if(this.y===350)this.v=-12; 
     }
@@ -590,7 +587,8 @@ class P2{
 class Checkers{
     constructor(){
         this.b=Array(8).fill(0).map((_,r)=>Array(8).fill(0).map((_,c)=>(r+c)%2?r<3?2:r>4?1:0:0));
-        this.t=1; this.s=null; this.mj=null; this.msg=""; this.mt=0;
+        this.t=Math.random()>0.5?1:2; // NÁHODNÝ START
+        this.s=null; this.mj=null; this.msg=""; this.mt=0;
         this.upd();
         
         const getXY = (e) => {
@@ -693,13 +691,22 @@ class Checkers{
                     let aJ=[]; 
                     for(let i=0;i<8;i++)for(let j=0;j<8;j++)if(this.b[i][j]&&(this.b[i][j]%2||2)===this.t)aJ.push(...this.getJ(i,j).map(m=>({sr:i,sc:j})));
                     
+                    let huffedSelf = false;
                     if(aJ.length>0){ 
-                        let bl=aJ[0]; this.b[bl.sr][bl.sc]=0; this.msg="FOUKNUTO!"; this.mt=60;
+                        // Pokud hráč přeskočení ignoroval
+                        let bl = aJ.find(x => x.sr === sr && x.sc === sc) || aJ[0];
+                        this.b[bl.sr][bl.sc]=0; // vymazání figurky, která měla skákat
+                        this.msg="FOUKNUTO!"; this.mt=60;
+                        if(bl.sr === sr && bl.sc === sc) huffedSelf = true; // Pokud to byla zrovna ta, kterou teď táhneme
                     }
                     
-                    if(r===0 && p===1) p=3; 
-                    if(r===7 && p===2) p=4;
-                    this.b[r][c]=p; this.b[sr][sc]=0;
+                    if (!huffedSelf) {
+                        if(r===0 && p===1) p=3; 
+                        if(r===7 && p===2) p=4;
+                        this.b[r][c]=p;
+                    }
+                    if (!huffedSelf) this.b[sr][sc]=0; // vymaže se původní políčko
+                    
                     this.t=3-this.t; this.upd(); this.chkL();
                 }
             }
