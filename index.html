@@ -169,7 +169,8 @@ const G=[
  {id:6,t:'Fotbal Pong',i:'⚽',d:'Pro 2 hráče. Sedněte si proti sobě!',pc:'H1: W/S, H2: Nahoru/Dolů',m:'Polož mobil, každý má svoje šipky'},
  {id:7,t:'Dáma',i:'♟️',d:'Kompletní česká pravidla s dámou!',pc:'Myš',m:'Vyber figurku a ťukni kam s ní'},
  {id:8,t:'Hledání min',i:'💣',d:'Klasické hledání min.',pc:'Levé tl.: odkrýt, Pravé tl.: vlajka',m:'Tlačítko v liště pro přepnutí ⛏️/🚩, pak ťuknout'},
- {id:9,t:'Ruleta',i:'🎰',d:'Klasická evropská ruleta. Vsaď si na čísla nebo barvy jako v kasinu!',pc:'Myš - klikání na sázky',m:'Ťukání na sázky'}
+ {id:9,t:'Ruleta',i:'🎰',d:'Klasická evropská ruleta. Vsaď si na čísla nebo barvy jako v kasinu!',pc:'Myš - klikání na sázky',m:'Ťukání na sázky'},
+ {id:10,t:'Blackjack',i:'🃏',d:'Klasický Blackjack proti krupiérovi. Získej 21!',pc:'Myš - klikání na tlačítka',m:'Ťukání na tlačítka'}
 ];
 
 let cId=0, loop=0, run=0, isPaused=0, gObj=null;
@@ -222,7 +223,7 @@ G.forEach(g=>{
 });
 
 function togglePause() {
-    if(!run || cId===5 || cId===7 || cId===8 || cId===9) return;
+    if(!run || cId===5 || cId===7 || cId===8 || cId===9 || cId===10) return;
     isPaused = !isPaused;
     
     let txt = isPaused ? "Zpět" : "Pauza";
@@ -301,12 +302,12 @@ function startG(){
     else if(cId===8) { // Miny
         document.getElementById('btn-flag').style.display='block';
     }
-    else if(cId===9) { // Ruleta
+    else if(cId===9 || cId===10) { // Ruleta & Blackjack
         ctrls.classList.remove('active');
         document.getElementById('btn-pause').style.display='none';
     }
 
-    if(cId!==2 && cId!==3 && cId!==5 && cId!==7 && cId!==8 && cId!==9 && !(cId===6 && !isMob)) {
+    if(cId!==2 && cId!==3 && cId!==5 && cId!==7 && cId!==8 && cId!==9 && cId!==10 && !(cId===6 && !isMob)) {
         ctrls.classList.add('active');
     }
 
@@ -314,7 +315,7 @@ function startG(){
     run=1;
     if(cId===1) gObj=new Tetris(); if(cId===2) gObj=new Flappy(); if(cId===3) gObj=new Dino();
     if(cId===4) gObj=new Pong(); if(cId===5) {initPisk(); return;} if(cId===6) gObj=new P2(); if(cId===7) gObj=new Checkers();
-    if(cId===8) {initMiny(); return;} if(cId===9) gObj=new Roulette();
+    if(cId===8) {initMiny(); return;} if(cId===9) gObj=new Roulette(); if(cId===10) gObj=new Blackjack();
     loopF();
 }
 
@@ -1049,7 +1050,6 @@ class Roulette {
     clk(x,y){
         if(this.spin) return;
 
-        // Roztočit
         if(x>220 && x<380 && y>430 && y<480){
             if(Object.keys(this.bets).length===0){ this.msg="Nejdřív vsaďte!"; return; }
             this.spin=1; this.res=R_SEQ[Math.floor(Math.random()*37)]; this.msg="Točí se...";
@@ -1060,13 +1060,11 @@ class Roulette {
             return;
         }
 
-        // Zrušit sázky
         if(x>20 && x<120 && y>430 && y<480){
             for(let k in this.bets) this.bal+=this.bets[k];
             this.bets={}; this.msg="Sázky zrušeny"; return;
         }
 
-        // Klik na herní plochu
         for(let a of this.A){
             if(x>a.x && x<a.x+a.w && y>a.y && y<a.y+a.h){
                 if(this.bal>=10){ 
@@ -1113,7 +1111,6 @@ class Roulette {
     d(ctx){
         ctx.fillStyle='#0f172a'; ctx.fillRect(0,0,400,500);
         
-        // Kreslení kola
         ctx.save(); ctx.translate(200, 120); ctx.rotate(this.ang);
         let sA = Math.PI*2/37;
         for(let i=0; i<37; i++){
@@ -1128,22 +1125,18 @@ class Roulette {
         ctx.beginPath(); ctx.arc(0,0,60,0,Math.PI*2); ctx.fillStyle='#0f172a'; ctx.fill();
         ctx.restore();
 
-        // Šipka na kole
         ctx.fillStyle='#facc15'; ctx.beginPath(); ctx.moveTo(200, 20); ctx.lineTo(190, 5); ctx.lineTo(210, 5); ctx.fill();
 
-        // Středové číslo
         ctx.fillStyle='#fff'; ctx.font='800 30px Poppins'; ctx.textAlign='center';
         if(this.res!==null && !this.spin){
             ctx.fillStyle = this.res===0?'#10b981':R_REDS.includes(this.res)?'#ef4444':'#cbd5e1';
             ctx.fillText(this.res, 200, 130);
         } else ctx.fillText("🎰", 200, 130);
 
-        // UI texty
         ctx.textAlign='left'; ctx.fillStyle='#facc15'; ctx.font='600 16px Poppins';
         ctx.fillText("Kredit: "+this.bal, 10, 25);
         ctx.fillStyle='#38bdf8'; ctx.font='600 14px Poppins'; ctx.fillText(this.msg, 10, 45);
 
-        // Kreslení sázecí tabulky
         for(let a of this.A){
             ctx.fillStyle = a.c!=='none'?a.c:'#1e293b'; ctx.fillRect(a.x, a.y, a.w, a.h);
             ctx.strokeStyle='rgba(255,255,255,0.2)'; ctx.lineWidth=1; ctx.strokeRect(a.x, a.y, a.w, a.h);
@@ -1151,7 +1144,6 @@ class Roulette {
             ctx.fillText(a.t, a.x+a.w/2, a.y+a.h/2);
         }
 
-        // Kreslení vložených žetonů
         for(let a of this.A){
             if(this.bets[a.k]){
                 ctx.beginPath(); ctx.arc(a.x+a.w/2, a.y+a.h/2, 12, 0, Math.PI*2);
@@ -1163,13 +1155,179 @@ class Roulette {
         
         ctx.textAlign='left'; ctx.textBaseline='alphabetic';
 
-        // Tlačítka dole
         ctx.fillStyle=this.spin?'#64748b':'#10b981'; ctx.fillRect(220, 430, 160, 40);
         ctx.fillStyle='#fff'; ctx.font='800 16px Poppins'; ctx.textAlign='center'; ctx.fillText("ROZTOČIT", 300, 456);
 
         ctx.fillStyle='#ef4444'; ctx.fillRect(20, 430, 100, 40);
         ctx.fillStyle='#fff'; ctx.font='600 14px Poppins'; ctx.fillText("Zrušit", 70, 456);
         ctx.textAlign='left';
+    }
+}
+
+// --- 10. BLACKJACK ---
+class Blackjack {
+    constructor() {
+        this.bal = 1000; this.bet = 0;
+        this.state = 0; // 0: bet, 1: play, 2: end
+        this.msg = "Vsaď si!";
+        this.deck = []; this.pH = []; this.dH = [];
+        this.f = 0;
+
+        const clickH = (e) => {
+            if(cId!==10) return;
+            e.preventDefault();
+            let rect = cvs.getBoundingClientRect();
+            let cx = e.touches ? e.touches[0].clientX : e.clientX;
+            let cy = e.touches ? e.touches[0].clientY : e.clientY;
+            this.clk((cx - rect.left)*(400/rect.width), (cy - rect.top)*(500/rect.height));
+        };
+        cvs.onmousedown = clickH;
+        cvs.ontouchstart = clickH;
+    }
+
+    mkDeck() {
+        this.deck = [];
+        let S = ['♥','♦','♣','♠'];
+        let V = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+        for(let s of S) for(let v of V) {
+            let num = (v==='A') ? 11 : (['J','Q','K'].includes(v) ? 10 : parseInt(v));
+            this.deck.push({s, v, num});
+        }
+        this.deck.sort(() => Math.random() - 0.5);
+    }
+
+    val(h) {
+        let sum = 0, aces = 0;
+        for(let c of h) { sum += c.num; if(c.v === 'A') aces++; }
+        while(sum > 21 && aces > 0) { sum -= 10; aces--; }
+        return sum;
+    }
+
+    clk(x, y) {
+        if(this.state === 0) {
+            if(y > 420 && y < 460) {
+                let b = 0;
+                if(x>20 && x<80) b=10;
+                else if(x>90 && x<150) b=50;
+                else if(x>160 && x<220) b=100;
+
+                if(b > 0 && this.bal >= b) { this.bet += b; this.bal -= b; this.msg = "Sázka: " + this.bet; }
+                else if(b > 0) { this.msg = "Málo kreditů!"; }
+                else if(x>230 && x<290) { this.bal += this.bet; this.bet = 0; this.msg = "Vsaď si!"; }
+                else if(x>300 && x<380 && this.bet > 0) {
+                    this.mkDeck();
+                    this.pH = [this.deck.pop(), this.deck.pop()];
+                    this.dH = [this.deck.pop(), this.deck.pop()];
+                    this.state = 1; this.msg = "Táhni nebo Stůj";
+                    if(this.val(this.pH) === 21) { this.state = 2; this.msg = "Blackjack!"; this.f = 30; }
+                }
+            }
+        } else if (this.state === 1) {
+            if(y > 410 && y < 460) {
+                if(x>50 && x<170) { 
+                    this.pH.push(this.deck.pop());
+                    if(this.val(this.pH) > 21) { this.state = 2; this.msg = "Přes! Prohra."; this.f = 0; }
+                } else if (x>230 && x<350) {
+                    this.state = 2; this.f = 30; this.msg = "Hraje dealer...";
+                }
+            }
+        } else if (this.state === 2 && this.f === 0) {
+            if(y > 410 && y < 460 && x>100 && x<300) {
+                this.state = 0; this.pH=[]; this.dH=[]; this.bet=0; this.msg="Vsaď si!";
+                if(this.bal<=0) { this.bal = 1000; this.msg = "Bankrot! Tady máš 1000."; }
+            }
+        }
+    }
+
+    u() {
+        if(this.state === 2 && this.f > 0) {
+            this.f--;
+            if(this.f === 0) {
+                let pV = this.val(this.pH);
+                if(pV <= 21) {
+                    let dV = this.val(this.dH);
+                    if(dV < 17) {
+                        this.dH.push(this.deck.pop());
+                        this.f = 40; 
+                    } else {
+                        if(dV > 21 || pV > dV) {
+                            let w = (pV === 21 && this.pH.length === 2) ? this.bet * 2.5 : this.bet * 2;
+                            this.bal += w; this.msg = "Výhra! (+" + w + ")";
+                        } else if (pV === dV) {
+                            this.bal += this.bet; this.msg = "Remíza (Vklad vrácen)";
+                        } else {
+                            this.msg = "Krupiér vyhrál.";
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    dC(ctx, c, x, y, hid) {
+        ctx.fillStyle = '#fff'; ctx.fillRect(x, y, 50, 70);
+        ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1; ctx.strokeRect(x, y, 50, 70);
+        if(hid) {
+            ctx.fillStyle = '#0f172a'; ctx.fillRect(x+2, y+2, 46, 66);
+            ctx.fillStyle = '#38bdf8'; ctx.font = '24px Poppins'; ctx.fillText('🂠', x+13, y+45);
+            return;
+        }
+        ctx.fillStyle = (c.s === '♥' || c.s === '♦') ? '#ef4444' : '#000';
+        ctx.font = '600 16px Poppins'; ctx.textAlign = 'left';
+        ctx.fillText(c.v, x+5, y+20);
+        ctx.font = '24px Poppins'; ctx.textAlign = 'center';
+        ctx.fillText(c.s, x+25, y+45);
+        ctx.textAlign = 'left';
+    }
+
+    d(ctx) {
+        ctx.fillStyle = '#0f172a'; ctx.fillRect(0,0,400,500);
+        ctx.fillStyle = '#10b981'; ctx.globalAlpha = 0.2;
+        ctx.beginPath(); ctx.ellipse(200, 250, 250, 150, 0, 0, Math.PI*2); ctx.fill();
+        ctx.globalAlpha = 1;
+
+        ctx.fillStyle = '#facc15'; ctx.font = '600 16px Poppins';
+        ctx.fillText("Kredit: " + this.bal, 10, 25);
+        ctx.fillStyle = '#38bdf8'; ctx.fillText(this.msg, 10, 50);
+
+        if(this.state > 0 || this.pH.length > 0) {
+            ctx.fillStyle = '#fff'; ctx.font = '600 14px Poppins';
+            ctx.fillText("Krupiér" + (this.state===2 ? " ("+this.val(this.dH)+")" : ""), 170, 80);
+            for(let i=0; i<this.dH.length; i++) {
+                this.dC(ctx, this.dH[i], 175 - this.dH.length*15 + i*30, 100, (i===1 && this.state===1));
+            }
+
+            ctx.fillStyle = '#fff';
+            ctx.fillText("Hráč (" + this.val(this.pH) + ")  | Sázka: " + this.bet, 120, 240);
+            for(let i=0; i<this.pH.length; i++) {
+                this.dC(ctx, this.pH[i], 175 - this.pH.length*15 + i*30, 260, false);
+            }
+        }
+
+        ctx.textAlign = 'center';
+        if(this.state === 0) {
+            let B = [
+                {t:'10', x:20, c:'#3b82f6'}, {t:'50', x:90, c:'#8b5cf6'},
+                {t:'100', x:160, c:'#10b981'}, {t:'Zruš', x:230, c:'#ef4444'},
+                {t:'HRAJ', x:300, c:'#f59e0b', w:80}
+            ];
+            for(let b of B) {
+                ctx.fillStyle = b.c; ctx.fillRect(b.x, 420, b.w||60, 40);
+                ctx.fillStyle = '#fff'; ctx.font = '800 14px Poppins';
+                ctx.fillText(b.t, b.x+(b.w||60)/2, 445);
+            }
+        } else if (this.state === 1) {
+            ctx.fillStyle = '#10b981'; ctx.fillRect(50, 410, 120, 50);
+            ctx.fillStyle = '#ef4444'; ctx.fillRect(230, 410, 120, 50);
+            ctx.fillStyle = '#fff'; ctx.font = '800 18px Poppins';
+            ctx.fillText("TÁHNOUT", 110, 442);
+            ctx.fillText("STÁT", 290, 442);
+        } else if (this.state === 2 && this.f === 0) {
+            ctx.fillStyle = '#3b82f6'; ctx.fillRect(100, 410, 200, 50);
+            ctx.fillStyle = '#fff'; ctx.font = '800 18px Poppins';
+            ctx.fillText("DALŠÍ HRA", 200, 442);
+        }
+        ctx.textAlign = 'left';
     }
 }
 </script>
