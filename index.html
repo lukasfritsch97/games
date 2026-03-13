@@ -46,7 +46,6 @@ canvas { display:block; max-width:100%; max-height:100%; aspect-ratio:4/5; objec
 .cell:hover { background: #1e293b; }
 .cell.x { color: var(--c2); text-shadow: 0 0 10px var(--c2); } .cell.o { color: var(--c1); text-shadow: 0 0 10px var(--c1); }
 
-/* Animace vítězné čáry */
 @keyframes drawWin { to { stroke-dashoffset: 0; } }
 .win-line { stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: drawWin 1s ease-in-out forwards; }
 
@@ -154,7 +153,6 @@ bBtn('bl','mL','ArrowLeft'); bBtn('br','mR','ArrowRight');
 bBtn('ba','mA','ArrowUp'); bBtn('bd','mD','ArrowDown');
 bBtn('p2l','m2L',null); bBtn('p2r','m2R',null);
 
-// Tap na canvas pro Flappy a Dino
 cvs.addEventListener('pointerdown', (e) => {
     if(cId===2 || cId===3) {
         e.preventDefault();
@@ -201,19 +199,17 @@ function startG(){
     let bl=document.getElementById('bl'), br=document.getElementById('br'), ba=document.getElementById('ba'), bd=document.getElementById('bd');
     let p2c=document.getElementById('p2-ctrls'), ctrls=document.getElementById('ctrls'), cBtns=document.getElementById('c-btns');
     
-    // Výchozí schování všech kontrolek
     bl.style.display='none'; br.style.display='none'; ba.style.display='none'; bd.style.display='none'; p2c.style.display='none'; cBtns.style.display='none';
     document.getElementById('btn-undo').style.display='none';
     document.getElementById('btn-pause').style.display='none';
 
     let isMob = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
 
-    // Nastavení UI podle hry
     if(cId===1) { // Tetris
         bl.style.display='flex'; br.style.display='flex'; ba.style.display='flex'; bd.style.display='flex'; cBtns.style.display='flex';
         ctrls.style.justifyContent='space-between'; document.getElementById('btn-pause').style.display='block';
     } 
-    else if(cId===2 || cId===3) { // Flappy, Dino - stačí tap
+    else if(cId===2 || cId===3) { // Flappy, Dino
         ctrls.classList.remove('active'); document.getElementById('btn-pause').style.display='block';
     }
     else if(cId===4) { // Pong
@@ -263,10 +259,9 @@ function loopF(){
         gObj.u(); 
         gObj.d(ctx); 
     } else {
-        // Vykreslení pauzy
         ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
         ctx.fillRect(0,0,400,500);
-        ctx.fillStyle = 'var(--c1)';
+        ctx.fillStyle = '#38bdf8'; // Ošetřeno hexem
         ctx.font = '800 45px Poppins';
         ctx.textAlign = 'center';
         ctx.fillText("PAUZA", 200, 250);
@@ -312,7 +307,7 @@ class Tetris{
         for(let r=0;r<20;r++)for(let cl=0;cl<10;cl++)if(this.b[r][cl]) this.fB(c,50+cl*20,r*20,this.b[r][cl]);
         for(let r=0;r<this.p.m.length;r++)for(let cl=0;cl<this.p.m[r].length;cl++)if(this.p.m[r][cl]) this.fB(c,50+(this.p.x+cl)*20,(this.p.y+r)*20,this.p.c);
         c.fillStyle='#fff'; c.font='600 20px Poppins'; c.fillText("Skóre:", 270, 40);
-        c.fillStyle='var(--c1)'; c.font='800 24px Poppins'; c.fillText(this.sc, 270, 70);
+        c.fillStyle='#38bdf8'; c.font='800 24px Poppins'; c.fillText(this.sc, 270, 70);
     }
 }
 
@@ -395,7 +390,7 @@ class Dino{
     d(c){
         c.fillStyle='#0f172a'; c.fillRect(0,0,400,500); 
         c.fillStyle='#334155'; c.fillRect(0,380,400,120); 
-        c.fillStyle='var(--c1)'; c.fillRect(0,380,400,3);
+        c.fillStyle='#38bdf8'; c.fillRect(0,380,400,3);
         
         this.o.forEach(o=>{ 
             c.fillStyle = '#10b981';
@@ -446,12 +441,13 @@ class Pong{
     }
     d(c){
         c.fillStyle='#0f172a'; c.fillRect(0,0,400,500);
-        // BEZPEČNÁ METODA PRO VŠECHNY PROHLÍŽEČE MÍSTO roundRect
-        c.fillStyle='var(--c1)'; c.fillRect(this.px, 480, 100, 10);
         
-        c.shadowBlur = 15; c.shadowColor = 'var(--c2)';
-        c.fillStyle='var(--c2)'; c.beginPath();c.arc(this.bx,this.by,8,0,7);c.fill();
+        c.fillStyle='#38bdf8'; c.fillRect(this.px, 480, 100, 10);
+        
+        c.shadowBlur = 15; c.shadowColor = '#ec4899';
+        c.fillStyle='#ec4899'; c.beginPath();c.arc(this.bx,this.by,8,0,Math.PI*2);c.fill();
         c.shadowBlur = 0;
+        
         c.fillStyle='rgba(255,255,255,0.1)'; c.font='800 100px Poppins'; c.textAlign='center'; c.fillText(this.s, 200, 300); c.textAlign='left';
     }
 }
@@ -518,21 +514,19 @@ class P2{
             c.beginPath(); c.moveTo(0,250); c.lineTo(400,250); c.stroke(); c.setLineDash([]);
             c.beginPath(); c.arc(200,250,50,0,Math.PI*2); c.stroke();
             
-            // BEZPEČNÁ METODA PRO VŠECHNY PROHLÍŽEČE MÍSTO roundRect
-            c.fillStyle='var(--c1)'; c.fillRect(this.x1,485,80,10); 
-            c.fillStyle='var(--c2)'; c.fillRect(this.x2,5,80,10);   
+            c.fillStyle='#38bdf8'; c.fillRect(this.x1,485,80,10); 
+            c.fillStyle='#ec4899'; c.fillRect(this.x2,5,80,10);   
             
-            c.fillStyle='#fff'; c.beginPath();c.arc(this.bx,this.by,8,0,7);c.fill(); 
+            c.fillStyle='#fff'; c.beginPath();c.arc(this.bx,this.by,8,0,Math.PI*2);c.fill(); 
             
-            c.save(); c.translate(200, 200); c.rotate(Math.PI); c.fillStyle='var(--c2)'; c.font='800 40px Poppins'; c.fillText(this.s2, -10, 0); c.restore();
-            c.fillStyle='var(--c1)'; c.font='800 40px Poppins'; c.fillText(this.s1, 190, 300);
+            c.save(); c.translate(200, 200); c.rotate(Math.PI); c.fillStyle='#ec4899'; c.font='800 40px Poppins'; c.fillText(this.s2, -10, 0); c.restore();
+            c.fillStyle='#38bdf8'; c.font='800 40px Poppins'; c.fillText(this.s1, 190, 300);
             if(this.w>0){c.fillStyle='#fff'; c.font='600 20px Poppins'; c.fillText("Připravit...", 150, 280);}
         } else {
-            // BEZPEČNÁ METODA PRO VŠECHNY PROHLÍŽEČE MÍSTO roundRect
-            c.fillStyle='var(--c1)'; c.fillRect(10,this.y1,10,80); 
-            c.fillStyle='var(--c2)'; c.fillRect(380,this.y2,10,80); 
+            c.fillStyle='#38bdf8'; c.fillRect(10,this.y1,10,80); 
+            c.fillStyle='#ec4899'; c.fillRect(380,this.y2,10,80); 
             
-            c.fillStyle='#fff'; c.beginPath();c.arc(this.bx,this.by,8,0,7);c.fill(); 
+            c.fillStyle='#fff'; c.beginPath();c.arc(this.bx,this.by,8,0,Math.PI*2);c.fill(); 
             c.font='800 30px Poppins'; c.textAlign='center'; c.fillText(this.s1+" - "+this.s2, 200, 40); c.textAlign='left';
             if(this.w>0){c.fillStyle='#fff'; c.font='600 20px Poppins'; c.fillText("Připravit...", 150, 200);}
         }
