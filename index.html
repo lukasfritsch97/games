@@ -90,6 +90,13 @@ canvas { display:block; max-width:100%; max-height:100%; aspect-ratio:4/5; objec
 <div id="game" class="screen">
     <div id="p2-ctrls" class="controls" style="display:none; width:100%; justify-content:space-between; padding: 10px 0; transform: rotate(180deg); flex-shrink:0;">
         <button class="m-btn" style="border-color:var(--c2);color:var(--c2);" id="p2l">◀</button>
+        <div id="p2-sys-btns" style="display:none; flex-direction:column; gap:5px; align-items:center; justify-content:center;">
+            <div style="display:flex; gap:5px;">
+                <button class="btn btn-sec" style="padding:6px 10px; font-size:0.8rem; margin:0;" onclick="nav('home')">Domů</button>
+                <button class="btn" style="padding:6px 10px; font-size:0.8rem; margin:0;" onclick="startG()">Reset</button>
+            </div>
+            <button class="btn" id="p2-pause" style="padding:6px 10px; font-size:0.8rem; margin:0;" onclick="togglePause()">Pauza</button>
+        </div>
         <button class="m-btn" style="border-color:var(--c2);color:var(--c2);" id="p2r">▶</button>
     </div>
 
@@ -120,6 +127,9 @@ canvas { display:block; max-width:100%; max-height:100%; aspect-ratio:4/5; objec
             <button class="m-btn" id="ba" style="border-color:var(--c2); color:var(--c2);">↻</button>
             <button class="m-btn" id="bd" style="border-color:var(--c3); color:var(--c3);">▼</button>
         </div>
+        <div id="p1-sys-btns" style="display:none; justify-content:center; align-items:center;">
+            <button class="btn" id="p1-pause" style="padding:6px 12px; font-size:0.8rem; margin:0;" onclick="togglePause()">Pauza</button>
+        </div>
         <button class="m-btn" id="br">▶</button>
     </div>
 </div>
@@ -138,7 +148,10 @@ const G=[
 let cId=0, loop=0, run=0, isPaused=0, gObj=null;
 const cvs=document.getElementById('cvs'), ctx=cvs.getContext('2d');
 cvs.width=400; cvs.height=500;
-let k={}; window.onkeydown=e=>k[e.code]=1; window.onkeyup=e=>k[e.code]=0;
+let k={}; 
+// ZAKÁZÁNÍ MEZERNÍKU PRO KLIKÁNÍ NA TLAČÍTKA
+window.onkeydown=e=>{ if(e.code==='Space') e.preventDefault(); k[e.code]=1; }; 
+window.onkeyup=e=>k[e.code]=0;
 
 var mL=0, mR=0, mA=0, mD=0, m2L=0, m2R=0; 
 
@@ -182,26 +195,49 @@ G.forEach(g=>{
 function togglePause() {
     if(!run || cId===5 || cId===7) return;
     isPaused = !isPaused;
-    document.getElementById('btn-pause').innerText = isPaused ? "Zpět do hry" : "Pauza";
-    document.getElementById('btn-pause').style.borderColor = isPaused ? "var(--c2)" : "var(--c1)";
-    document.getElementById('btn-pause').style.color = isPaused ? "var(--c2)" : "var(--txt)";
+    
+    let txt = isPaused ? "Zpět" : "Pauza";
+    let col = isPaused ? "var(--c2)" : "var(--txt)";
+    let bc = isPaused ? "var(--c2)" : "var(--c1)";
+    
+    // AKTUALIZACE VŠECH TLAČÍTEK PAUZY (včetně těch mobilních)
+    ['btn-pause', 'p1-pause', 'p2-pause'].forEach(id => {
+        let btn = document.getElementById(id);
+        if(btn) {
+            btn.innerText = (isPaused && id === 'btn-pause') ? "Zpět do hry" : txt;
+            btn.style.color = col;
+            btn.style.borderColor = bc;
+        }
+    });
+    
+    // Zrušení zaostření tlačítka (pro jistotu u myši/dotyku)
+    if(document.activeElement) document.activeElement.blur();
 }
 
 function startG(){
     nav('game'); document.getElementById('over').classList.remove('active');
     document.getElementById('new-hs').style.display='none';
-    isPaused=0; document.getElementById('btn-pause').innerText="Pauza";
-    document.getElementById('btn-pause').style.color="var(--txt)";
-    document.getElementById('btn-pause').style.borderColor="var(--c1)";
+    isPaused=0; 
+    ['btn-pause', 'p1-pause', 'p2-pause'].forEach(id => {
+        let btn = document.getElementById(id);
+        if(btn) {
+            btn.innerText = "Pauza";
+            btn.style.color = "var(--txt)";
+            btn.style.borderColor = "var(--c1)";
+        }
+    });
     
     cvs.style.display=cId===5?'none':'block'; document.getElementById('p-grid').style.display=cId===5?'grid':'none';
     
     let bl=document.getElementById('bl'), br=document.getElementById('br'), ba=document.getElementById('ba'), bd=document.getElementById('bd');
     let p2c=document.getElementById('p2-ctrls'), ctrls=document.getElementById('ctrls'), cBtns=document.getElementById('c-btns');
+    let p2sys=document.getElementById('p2-sys-btns'), p1sys=document.getElementById('p1-sys-btns');
     
     bl.style.display='none'; br.style.display='none'; ba.style.display='none'; bd.style.display='none'; p2c.style.display='none'; cBtns.style.display='none';
     document.getElementById('btn-undo').style.display='none';
     document.getElementById('btn-pause').style.display='none';
+    if(p2sys) p2sys.style.display='none';
+    if(p1sys) p1sys.style.display='none';
 
     let isMob = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
 
@@ -223,6 +259,8 @@ function startG(){
         if(isMob) {
             bl.style.display='flex'; br.style.display='flex'; ctrls.style.justifyContent='space-between';
             p2c.style.display='flex'; document.getElementById('t-bar').style.display='none';
+            if(p2sys) p2sys.style.display='flex';
+            if(p1sys) p1sys.style.display='flex';
         }
     }
 
@@ -261,7 +299,7 @@ function loopF(){
     } else {
         ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
         ctx.fillRect(0,0,400,500);
-        ctx.fillStyle = '#38bdf8'; // Ošetřeno hexem
+        ctx.fillStyle = '#38bdf8';
         ctx.font = '800 45px Poppins';
         ctx.textAlign = 'center';
         ctx.fillText("PAUZA", 200, 250);
